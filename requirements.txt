@@ -1,0 +1,6 @@
+llama-cpp-python
+sentence-transformers
+faiss-cpu
+langchain
+langchain_community
+langchain-huggingface
