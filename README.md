@@ -2,6 +2,9 @@
 
 A fully local and private Retrieval-Augmented Generation (RAG) system using 4-bit quantized LLaMA, semantic chunking, FAISS vector search, cross-encoder reranking, and zero-shot intent classification built with LangChain and HuggingFace to answer queries from a structured internal company knowledge base.
 
+<img width="756" height="139" alt="Screenshot 2025-11-25 at 7 42 34 PM" src="https://github.com/user-attachments/assets/955da51a-6f88-4d15-a4d0-919f41ce2bfc" />
+
+
 ---
 
 ## Setup
