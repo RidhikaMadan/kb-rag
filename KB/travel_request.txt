@@ -1,0 +1,11 @@
+Title: Submitting a Travel Request
+
+Employees needing to travel for business must follow the company travel approval process:
+
+1. Log into the operations portal and select “Travel Requests.”
+2. Enter travel dates, purpose, destination, and estimated expenses.
+3. Attach supporting documents, such as meeting invitations or event agendas.
+4. Submit the request for managerial and finance approval.
+5. Once approved, the travel coordinator will assist with bookings and reimbursement instructions.
+
+All travel must comply with company travel policies. Requests submitted less than one week before departure may not be approved.

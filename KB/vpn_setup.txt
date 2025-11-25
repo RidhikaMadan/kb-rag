@@ -1,0 +1,11 @@
+Title: VPN Setup Guide
+
+To securely access company resources remotely, all employees must use the company VPN. Follow these steps to set up your VPN:
+
+1. Download the official VPN client from the IT portal. Ensure you select the correct version for your operating system.
+2. Install the client, following the on-screen instructions.
+3. Open the VPN client and enter your company credentials.
+4. Select the appropriate server location (usually your regional office) to optimize connection speed.
+5. Test your connection by accessing internal resources such as the intranet or shared drives.
+
+If you encounter any connection issues, contact the IT helpdesk with a description of the problem, your operating system, and screenshots if possible. Remember to disconnect from the VPN when not in use to maintain network security.

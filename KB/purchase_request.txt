@@ -1,0 +1,11 @@
+Title: Submitting a Purchase Request
+
+All purchase requests must be submitted through the company’s operations portal to ensure proper approval and tracking. Follow these steps:
+
+1. Log into the operations portal with your employee credentials.
+2. Navigate to “Purchase Requests” and click “Create New Request.”
+3. Enter details of the items or services needed, including vendor, quantity, and estimated cost.
+4. Attach any necessary supporting documents such as quotes or approvals from your manager.
+5. Submit the request for approval. Your manager and the finance team will review and either approve, reject, or request modifications.
+
+Once approved, the purchasing department will process the order and notify you when the items are ready or delivered. Keep records of all purchase requests for auditing purposes.

@@ -1,0 +1,11 @@
+Title: Installing Company Software
+
+To install company-approved software on your workstation:
+
+1. Log in to the IT portal with your credentials.
+2. Navigate to the “Software Downloads” section.
+3. Select the required software and download the installer compatible with your operating system.
+4. Follow the on-screen instructions to install the software.
+5. Once installation is complete, verify that the application opens and functions correctly.
+
+If you encounter installation errors or software does not run properly, submit a support ticket to the IT helpdesk including screenshots and error messages.

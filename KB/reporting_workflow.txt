@@ -1,0 +1,11 @@
+Title: Internal Reporting Workflow
+
+To ensure smooth operations, employees must follow the internal reporting workflow for project updates and status reports:
+
+1. Log into the project management system.
+2. Update your tasks and milestones daily, marking progress accurately.
+3. Submit weekly status reports every Friday, summarizing completed tasks, ongoing work, and any blockers.
+4. Send reports to your manager and relevant stakeholders.
+5. Attend weekly team meetings to discuss reports, provide clarifications, and plan for the upcoming week.
+
+Following this workflow ensures transparency, accountability, and efficient communication across teams. Any deviations or delays should be communicated proactively.

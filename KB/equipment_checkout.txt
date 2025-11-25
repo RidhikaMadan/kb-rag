@@ -1,0 +1,11 @@
+Title: Equipment Checkout Procedure
+
+Employees may check out company equipment for temporary use. To do so:
+
+1. Log into the operations portal and navigate to “Equipment Checkout.”
+2. Select the item(s) required and specify the intended use and return date.
+3. Submit the request for approval by your manager.
+4. Once approved, pick up the equipment from the designated storage area and sign the checkout log.
+5. Return the equipment by the specified date in good condition. Report any damage or malfunctions to the operations team.
+
+Following this procedure ensures accountability and proper maintenance of company assets.
