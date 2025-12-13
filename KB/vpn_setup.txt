@@ -1,0 +1,139 @@
+VIRTUAL PRIVATE NETWORK (VPN) SETUP AND USAGE GUIDE
+
+OVERVIEW
+All employees who work remotely or need to access company resources from outside the office network must use the TechCorp VPN. The VPN creates a secure, encrypted connection to our internal network, protecting sensitive data and ensuring compliance with security policies.
+
+SYSTEM REQUIREMENTS
+- Operating System: Windows 10/11, macOS 10.15+, or Linux (Ubuntu 20.04+)
+- Internet Connection: Minimum 5 Mbps download, 1 Mbps upload
+- Administrator privileges for initial installation
+- Company-issued device or approved personal device with security software installed
+
+DOWNLOAD AND INSTALLATION
+
+Step 1: Download the VPN Client
+1. Log in to the IT Portal at https://portal.techcorp.com
+2. Navigate to "Software Downloads" > "Security Tools"
+3. Select "VPN Client" and choose your operating system
+4. Download the installer package
+5. Verify the file checksum matches the value provided on the portal
+
+Step 2: Installation Process
+Windows:
+1. Right-click the installer and select "Run as Administrator"
+2. Follow the installation wizard
+3. Accept the license agreement
+4. Choose installation location (default recommended)
+5. Complete installation and restart if prompted
+
+macOS:
+1. Open the downloaded .dmg file
+2. Drag the VPN client to Applications folder
+3. Open System Preferences > Security & Privacy
+4. Click "Open Anyway" if prompted about unidentified developer
+5. Enter your administrator password when requested
+
+Linux:
+1. Extract the downloaded package: tar -xzf vpn-client-linux.tar.gz
+2. Navigate to the extracted directory
+3. Run: sudo ./install.sh
+4. Follow on-screen prompts
+
+Step 3: Initial Configuration
+1. Launch the VPN client application
+2. Enter your company credentials (username and password)
+3. Select your primary server location:
+   - US East (New York) - Recommended for East Coast employees
+   - US West (San Francisco) - Recommended for West Coast employees
+   - Europe (London) - For international employees
+   - Asia Pacific (Singapore) - For APAC region
+4. Save your configuration for future use
+
+CONNECTING TO THE VPN
+
+Daily Connection Process:
+1. Launch the VPN client from your applications menu
+2. Click "Connect" or use the quick connect option
+3. Enter your password (or use saved credentials)
+4. Wait for connection confirmation (usually 10-30 seconds)
+5. Verify connection by checking the VPN status indicator (green icon)
+
+AUTOMATIC CONNECTION SETUP
+To automatically connect when your computer starts:
+1. Open VPN client settings
+2. Navigate to "Connection" tab
+3. Enable "Connect on startup"
+4. Enable "Reconnect automatically" for dropped connections
+5. Save settings
+
+TROUBLESHOOTING COMMON ISSUES
+
+Issue: "Cannot connect to VPN server"
+Solutions:
+- Verify your internet connection is working
+- Check if you're behind a firewall that blocks VPN traffic (ports 443, 1194)
+- Try connecting to a different server location
+- Restart the VPN client application
+- Contact IT Helpdesk if problem persists
+
+Issue: "Connection drops frequently"
+Solutions:
+- Check your internet connection stability
+- Move closer to your Wi-Fi router or use a wired connection
+- Disable other VPN connections or network tools
+- Update VPN client to latest version
+- Contact IT Helpdesk for connection optimization
+
+Issue: "Slow connection speed"
+Solutions:
+- Connect to a server location closer to your physical location
+- Close bandwidth-intensive applications
+- Check your internet speed (run speed test)
+- Disconnect and reconnect to VPN
+- Contact IT Helpdesk for performance analysis
+
+Issue: "Authentication failed"
+Solutions:
+- Verify your username and password are correct
+- Ensure your account is not locked (check with IT)
+- Reset your password if it has expired
+- Clear saved credentials and re-enter them
+- Contact IT Helpdesk for account verification
+
+SECURITY BEST PRACTICES
+- Always disconnect from VPN when not actively using company resources
+- Never share your VPN credentials with anyone
+- Use VPN only on company-issued or approved devices
+- Keep VPN client software updated to latest version
+- Report any suspicious VPN activity to security@techcorp.com
+- Enable automatic updates for the VPN client
+
+ACCESSING COMPANY RESOURCES VIA VPN
+Once connected, you can access:
+- Internal file shares and network drives
+- Company intranet and internal websites
+- Development servers and databases
+- Remote desktop connections to office workstations
+- Internal communication tools and collaboration platforms
+
+DISCONNECTING FROM VPN
+1. Click the VPN client icon in your system tray
+2. Select "Disconnect" from the menu
+3. Confirm disconnection (status indicator should turn gray/red)
+4. Close the VPN client if you won't be using it for an extended period
+
+VPN USAGE POLICIES
+- VPN access is monitored and logged for security purposes
+- Personal use of company VPN is prohibited
+- All traffic through VPN is subject to company security policies
+- Violations of VPN usage policies may result in access revocation
+- VPN access is automatically revoked upon employee termination
+
+SUPPORT AND CONTACT INFORMATION
+For VPN-related issues, contact:
+- IT Helpdesk: helpdesk@techcorp.com, ext. 2000
+- IT Portal: https://portal.techcorp.com
+- Emergency IT Support (24/7): emergency-it@techcorp.com
+- VPN Documentation: https://wiki.techcorp.com/vpn
+
+Remember: A secure connection protects both you and the company. Always use VPN when accessing company resources remotely.

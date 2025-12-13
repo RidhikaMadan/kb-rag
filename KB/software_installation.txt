@@ -1,0 +1,159 @@
+SOFTWARE INSTALLATION AND MANAGEMENT POLICIES
+
+OVERVIEW
+All software installations on company devices must follow our IT security and compliance policies. This guide covers the process for installing approved software, requesting new software, and managing software licenses.
+
+APPROVED SOFTWARE CATEGORIES
+The following software categories are pre-approved and available through the IT Portal:
+- Development Tools: IDEs, code editors, version control clients, package managers
+- Communication: Slack, Microsoft Teams, Zoom, WebEx
+- Productivity: Microsoft Office 365, Google Workspace, Adobe Creative Cloud
+- Security: Antivirus, VPN clients, password managers
+- Design: Figma, Sketch, Adobe XD, Canva Pro
+- Database Tools: MySQL Workbench, pgAdmin, MongoDB Compass
+- Cloud Services: AWS CLI, Azure CLI, Google Cloud SDK
+
+INSTALLATION PROCESS FOR APPROVED SOFTWARE
+
+Step 1: Access IT Portal
+1. Navigate to https://portal.techcorp.com
+2. Log in with your company credentials
+3. Navigate to "Software Downloads" section
+
+Step 2: Select and Download Software
+1. Browse available software by category or search by name
+2. Review system requirements and compatibility information
+3. Select your operating system (Windows, macOS, or Linux)
+4. Click "Download" button
+5. Verify the download completed successfully
+
+Step 3: Installation
+Windows:
+1. Locate the downloaded installer in your Downloads folder
+2. Right-click and select "Run as Administrator" (if required)
+3. Follow installation wizard prompts
+4. Accept license agreements
+5. Choose installation location (default recommended unless you have specific requirements)
+6. Complete installation and restart if prompted
+
+macOS:
+1. Open the downloaded .dmg or .pkg file
+2. Follow the installation assistant
+3. Enter your administrator password when prompted
+4. Complete installation
+5. Move application to Applications folder if needed
+
+Linux:
+1. Extract downloaded package if compressed
+2. Navigate to extracted directory in terminal
+3. Run installation script: sudo ./install.sh (or follow package-specific instructions)
+4. Verify installation completed successfully
+
+Step 4: Verification and Configuration
+1. Launch the installed application
+2. Verify it opens and functions correctly
+3. Configure initial settings if required
+4. Update software to latest version if prompted
+5. Register with company license if applicable
+
+REQUESTING NEW SOFTWARE
+If you need software that is not in the approved list:
+
+1. Submit Software Request Form:
+   - Access IT Portal > "Software Requests"
+   - Fill out the request form with:
+     * Software name and version
+     * Business justification
+     * Intended use case
+     * Required features
+     * Alternative software considered
+   - Attach vendor quotes or pricing information if available
+   - Submit for IT and security review
+
+2. Review Process:
+   - IT Security reviews for security and compliance risks
+   - IT Procurement evaluates licensing and costs
+   - Your manager approves business justification
+   - Process typically takes 3-5 business days
+
+3. Approval and Installation:
+   - You'll receive email notification of approval/denial
+   - If approved, software will be added to IT Portal
+   - Follow standard installation process above
+
+SOFTWARE LICENSE MANAGEMENT
+- All software must be licensed and properly documented
+- Personal licenses cannot be used for company work
+- Sharing licenses between employees is prohibited
+- Report license issues to IT immediately
+- Annual license audits are conducted company-wide
+
+SOFTWARE UPDATES AND MAINTENANCE
+- Enable automatic updates where available
+- Check for updates monthly for critical software
+- IT Portal provides update notifications for company software
+- Security patches must be installed within 48 hours of release
+- Test updates in non-production environments when possible
+
+REMOVING SOFTWARE
+To uninstall software:
+1. Use standard uninstaller (Windows: Control Panel > Programs, macOS: Applications folder > drag to Trash)
+2. Remove leftover files and preferences if needed
+3. Update IT Portal to reflect removal (for license tracking)
+4. Contact IT if you encounter issues removing software
+
+TROUBLESHOOTING INSTALLATION ISSUES
+
+Issue: "Installation blocked by administrator"
+Solution: Contact IT Helpdesk to request installation permissions or use company-managed installation tools.
+
+Issue: "Software won't launch after installation"
+Solutions:
+- Verify system requirements are met
+- Check for conflicting software
+- Reinstall the software
+- Contact IT Helpdesk with error messages
+
+Issue: "License activation failed"
+Solutions:
+- Verify you're using company-provided license key
+- Check internet connection for online activation
+- Contact IT Helpdesk for license assistance
+
+Issue: "Software conflicts with existing programs"
+Solutions:
+- Review compatibility requirements
+- Temporarily disable conflicting software
+- Contact IT Helpdesk for conflict resolution
+
+SECURITY CONSIDERATIONS
+- Only install software from approved sources
+- Never install software from untrusted websites or email attachments
+- Report suspicious software behavior immediately
+- Keep all software updated with latest security patches
+- Use company-approved antivirus software
+- Review software permissions before granting access
+
+PROHIBITED SOFTWARE
+The following types of software are prohibited:
+- Peer-to-peer file sharing applications
+- Unlicensed or pirated software
+- Software that bypasses security controls
+- Personal cloud storage not approved by IT
+- Cryptocurrency mining software
+- Software with known security vulnerabilities
+
+COMPLIANCE AND AUDITING
+- IT conducts regular software audits
+- Unauthorized software may be automatically removed
+- Violations of software policies may result in disciplinary action
+- All software installations are logged for compliance
+
+SUPPORT AND CONTACT
+For software installation assistance:
+- IT Helpdesk: helpdesk@techcorp.com, ext. 2000
+- IT Portal: https://portal.techcorp.com
+- Software Request Form: Available in IT Portal
+- Emergency IT Support: emergency-it@techcorp.com
+
+Remember: Proper software management protects company data and ensures compliance with licensing agreements.

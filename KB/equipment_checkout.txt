@@ -1,0 +1,199 @@
+EQUIPMENT CHECKOUT AND ASSET MANAGEMENT
+
+OVERVIEW
+TechCorp maintains a comprehensive equipment inventory for employee use. This guide covers the process for checking out company equipment, usage policies, and return procedures.
+
+AVAILABLE EQUIPMENT FOR CHECKOUT
+
+Technology Equipment:
+- Laptops and tablets (for temporary use, travel, or special projects)
+- Monitors and displays (for remote work setups)
+- Projectors and presentation equipment
+- Audio/video equipment (cameras, microphones, speakers)
+- Network equipment (routers, switches for testing)
+- Mobile devices (smartphones, tablets for field work)
+
+Office Equipment:
+- Printers and scanners
+- Conference room equipment
+- Whiteboards and presentation boards
+- Office furniture (desks, chairs for temporary setups)
+
+Specialized Equipment:
+- Development hardware (test devices, development boards)
+- Testing equipment (multimeters, oscilloscopes)
+- Field equipment (portable workstations, rugged devices)
+
+CHECKOUT PROCESS
+
+Step 1: Determine Equipment Needs
+Before requesting equipment:
+- Identify specific equipment needed
+- Determine duration of use
+- Check equipment availability in portal
+- Verify you have necessary training/certifications (for specialized equipment)
+
+Step 2: Submit Checkout Request
+1. Log into Operations Portal at https://ops.techcorp.com
+2. Navigate to "Equipment" > "Equipment Checkout"
+3. Complete checkout request form:
+   - Select equipment category and specific item
+   - Enter checkout date and expected return date
+   - Specify intended use and business justification
+   - Note any special requirements or accessories needed
+   - Provide project code or cost center if applicable
+4. Submit for manager approval
+
+Step 3: Approval Process
+- Manager reviews and approves request
+- IT/Operations verifies equipment availability
+- You receive email confirmation with:
+  * Approved checkout dates
+  * Pickup location and instructions
+  * Equipment condition checklist
+  * Return procedures
+
+Step 4: Equipment Pickup
+1. Arrive at designated pickup location (IT Equipment Room or Operations)
+2. Present employee ID and checkout confirmation
+3. Staff will:
+   - Retrieve equipment from inventory
+   - Conduct equipment inspection with you
+   - Document any existing damage or issues
+   - Provide user manuals and setup instructions
+4. Sign equipment checkout form acknowledging:
+   - Equipment condition
+   - Return date
+   - Responsibility for care and return
+   - Liability for damage or loss
+
+EQUIPMENT USAGE POLICIES
+
+Usage Guidelines:
+- Equipment is for business use only
+- Personal use is prohibited
+- Equipment must be used in accordance with company policies
+- Follow manufacturer's usage guidelines
+- Report malfunctions immediately
+
+Care and Maintenance:
+- Handle equipment with care
+- Keep equipment in secure location when not in use
+- Protect from damage, theft, or loss
+- Do not modify or tamper with equipment
+- Keep equipment clean and in good condition
+
+Security Requirements:
+- Use company-approved security software
+- Enable encryption and password protection
+- Do not store sensitive data without encryption
+- Follow data security policies
+- Report lost or stolen equipment immediately
+
+RETURN PROCEDURES
+
+Step 1: Prepare Equipment for Return
+Before returning:
+- Back up any personal data (equipment will be wiped)
+- Remove personal files and applications
+- Clean equipment (keyboard, screen, casing)
+- Gather all accessories and cables
+- Pack in original packaging if available
+
+Step 2: Schedule Return
+1. Log into Operations Portal
+2. Navigate to "Equipment" > "My Checkouts"
+3. Select equipment to return
+4. Click "Schedule Return"
+5. Select return date and time
+6. Confirm return appointment
+
+Step 3: Return Equipment
+1. Arrive at designated return location at scheduled time
+2. Present equipment and accessories
+3. Staff will:
+   - Inspect equipment for damage
+   - Verify all accessories are included
+   - Test equipment functionality
+   - Document condition
+4. Sign return form acknowledging return
+
+EQUIPMENT DAMAGE AND LIABILITY
+
+Damage Assessment:
+- Normal wear and tear: No charge
+- Accidental damage: May incur repair or replacement cost
+- Negligence or misuse: Employee responsible for full cost
+- Loss or theft: Employee responsible for replacement cost
+
+Reporting Damage:
+1. Report immediately to IT/Operations
+2. Do not attempt repairs yourself
+3. Provide details of incident
+4. Work with staff to assess damage and costs
+5. Review insurance coverage if applicable
+
+EXTENSIONS AND RENEWALS
+
+Requesting Extensions:
+- Submit extension request at least 3 days before return date
+- Provide justification for extended use
+- Manager approval required
+- Subject to equipment availability
+- Cannot extend beyond maximum checkout period (typically 90 days)
+
+RENEWAL PROCESS
+- If equipment is needed long-term, discuss permanent assignment with manager
+- May require separate procurement process
+- IT/Operations can assist with permanent equipment requests
+
+EQUIPMENT INVENTORY AND AVAILABILITY
+- Check real-time availability in Operations Portal
+- Popular items may have waiting lists
+- Reserve equipment in advance for important projects
+- Contact IT/Operations for availability questions
+
+SPECIALIZED EQUIPMENT REQUIREMENTS
+Some equipment requires:
+- Training or certification
+- Security clearance
+- Special handling procedures
+- Insurance coverage
+
+Check with IT/Operations before requesting specialized equipment.
+
+FREQUENTLY ASKED QUESTIONS
+
+Q: How long can I keep equipment?
+A: Standard checkout period is 30 days, extendable to 90 days maximum with approval.
+
+Q: What if I damage the equipment?
+A: Report immediately. Assessment will determine if repair/replacement cost applies.
+
+Q: Can I take equipment home?
+A: Yes, with manager approval and for business purposes. Follow security guidelines.
+
+Q: What if equipment malfunctions?
+A: Contact IT Helpdesk immediately. Do not attempt repairs. Replacement may be provided.
+
+Q: Can I check out equipment for personal use?
+A: No, company equipment is for business use only.
+
+Q: What happens if I lose equipment?
+A: Report immediately to IT/Operations and Security. You may be responsible for replacement cost.
+
+BEST PRACTICES
+- Request equipment well in advance
+- Return equipment on time or request extensions early
+- Handle equipment with care
+- Keep equipment secure
+- Report issues immediately
+- Follow all usage policies
+
+SUPPORT AND CONTACT
+- IT Equipment Management: equipment@techcorp.com, ext. 2000
+- Operations Portal: https://ops.techcorp.com
+- IT Helpdesk: helpdesk@techcorp.com, ext. 2000
+- Equipment Availability: Check portal or contact IT directly
+
+Remember: Proper equipment management ensures availability for all employees and protects company assets.

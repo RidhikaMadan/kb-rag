@@ -1,0 +1,174 @@
+PURCHASE REQUEST AND PROCUREMENT PROCEDURES
+
+OVERVIEW
+All company purchases must follow the procurement process to ensure proper approval, budget compliance, and vendor management. This guide covers the complete process from request submission to order fulfillment.
+
+PURCHASE REQUEST TYPES
+
+Standard Purchase Requests:
+- Office supplies and equipment
+- Software licenses and subscriptions
+- Professional services and consulting
+- Marketing materials and promotional items
+- Training and conference registrations
+
+Capital Expenditures:
+- Equipment over $5,000
+- Furniture and fixtures
+- Technology infrastructure
+- Facility improvements
+
+Emergency Purchases:
+- Critical business operations
+- Health and safety requirements
+- Time-sensitive opportunities
+
+SUBMITTING A PURCHASE REQUEST
+
+Step 1: Pre-Request Preparation
+Before submitting, gather:
+- Item/service description and specifications
+- Vendor information and contact details
+- Quotes or pricing information (minimum 2-3 quotes for purchases over $1,000)
+- Business justification
+- Budget code or cost center
+- Manager approval (verbal or email)
+
+Step 2: Create Purchase Request
+1. Log into Operations Portal at https://ops.techcorp.com
+2. Navigate to "Procurement" > "Purchase Requests" > "New Request"
+3. Complete all required fields:
+   - Requester Information: Name, department, employee ID
+   - Purchase Details:
+     * Item/service description
+     * Quantity
+     * Unit price and total cost
+     * Vendor name and contact information
+     * Requested delivery date
+   - Business Justification:
+     * Why this purchase is needed
+     * How it supports business objectives
+     * Impact if not purchased
+   - Budget Information:
+     * Cost center or budget code
+     * Project code (if applicable)
+     * Funding source
+   - Supporting Documents:
+     * Vendor quotes (PDF format)
+     * Product specifications
+     * Manager approval email
+     * Alternative vendor quotes (if required)
+
+Step 3: Approval Workflow
+Submit request and await approvals:
+- Manager Approval: Required for all requests
+- Finance Approval: Required for purchases over $500
+- Department Head Approval: Required for purchases over $5,000
+- Executive Approval: Required for purchases over $25,000
+
+APPROVAL TIMELINES
+- Standard requests (<$500): 2-3 business days
+- Medium requests ($500-$5,000): 3-5 business days
+- Large requests ($5,000-$25,000): 5-7 business days
+- Capital expenditures (>$25,000): 7-10 business days
+- Emergency requests: Expedited review, typically 24-48 hours
+
+PURCHASE ORDER PROCESS
+
+Once Approved:
+1. You'll receive email confirmation with purchase order (PO) number
+2. Procurement team contacts vendor with official PO
+3. Vendor confirms order and provides delivery timeline
+4. You receive updates on order status
+5. Upon delivery, verify items match order
+6. Submit receipt/invoice for payment processing
+
+VENDOR REQUIREMENTS
+- Preferred vendors: Use company-approved vendors when possible (see vendor list in portal)
+- New vendors: Must complete vendor registration process
+- Vendor evaluation: Based on price, quality, delivery, and service
+- Payment terms: Net 30 standard, negotiate better terms when possible
+
+BUDGET AND COST CENTERS
+- All purchases must be charged to appropriate cost center
+- Verify budget availability before submitting request
+- Project-specific purchases require project code
+- Capital expenditures require capital budget approval
+
+PROHIBITED PURCHASES
+The following cannot be purchased through company procurement:
+- Personal items or services
+- Gifts for personal use
+- Alcohol (except approved business events)
+- Items for resale
+- Services from unregistered vendors
+- Purchases exceeding budget without approval
+
+EMERGENCY PURCHASES
+For urgent business-critical purchases:
+1. Contact Procurement Department immediately: procurement@techcorp.com, ext. 5000
+2. Explain urgency and business impact
+3. Get verbal approval from manager and finance
+4. Submit formal request within 24 hours
+5. Expedited processing available for true emergencies
+
+RECEIVING AND VERIFICATION
+When items are delivered:
+1. Inspect packaging for damage
+2. Verify items match purchase order
+3. Check quantities and specifications
+4. Test equipment if applicable
+5. Report any discrepancies immediately
+6. Sign delivery receipt
+7. Update purchase request status in portal
+
+RETURNS AND EXCHANGES
+- Contact vendor directly for returns/exchanges
+- Notify Procurement Department of returns
+- Update purchase request with return information
+- Process refunds through finance department
+
+EXPENSE REPORTING FOR DIRECT PURCHASES
+If you purchase directly (with prior approval):
+1. Submit expense report with receipts
+2. Include purchase order number if available
+3. Attach itemized receipts
+4. Categorize expense appropriately
+5. Submit within 5 business days of purchase
+
+FREQUENTLY ASKED QUESTIONS
+
+Q: Can I purchase items directly and get reimbursed?
+A: Only with prior approval and for small purchases (<$100). Submit request first, get approval, then purchase.
+
+Q: How do I know if a vendor is approved?
+A: Check the Preferred Vendors list in Operations Portal or contact Procurement.
+
+Q: What if I need something urgently?
+A: Contact Procurement for emergency purchase process. Standard process may be too slow.
+
+Q: Can I change a purchase request after submission?
+A: Yes, if not yet approved. Cancel and resubmit. If approved, contact Procurement for modifications.
+
+Q: What if my request is denied?
+A: Review denial reason. You can appeal with additional justification or resubmit with modifications.
+
+Q: How long does delivery take?
+A: Varies by vendor and item. Check with Procurement for estimated delivery times.
+
+BEST PRACTICES
+- Plan purchases in advance when possible
+- Get multiple quotes for significant purchases
+- Use preferred vendors for better pricing and service
+- Provide clear business justification
+- Keep all documentation organized
+- Follow up on delivery status
+- Report issues promptly
+
+SUPPORT AND CONTACT
+- Procurement Department: procurement@techcorp.com, ext. 5000
+- Operations Portal: https://ops.techcorp.com
+- Finance Department: finance@techcorp.com, ext. 4000
+- Purchase Request Help: purchase-help@techcorp.com
+
+Remember: Following proper procurement procedures ensures compliance, cost control, and efficient operations.

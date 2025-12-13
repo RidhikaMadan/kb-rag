@@ -1,0 +1,26 @@
+# Core dependencies
+fastapi
+uvicorn[standard]
+pydantic
+python-multipart
+
+# LLM Providers
+openai
+llama-cpp-python
+
+# RAG and Embeddings
+sentence-transformers
+faiss-cpu
+langchain
+langchain-community
+langchain-huggingface
+
+# Database
+pymongo
+
+# Utilities
+numpy
+
+# File processing
+PyPDF2
+markdown

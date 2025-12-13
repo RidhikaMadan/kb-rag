@@ -1,0 +1,166 @@
+BUSINESS TRAVEL REQUEST AND REIMBURSEMENT PROCEDURES
+
+OVERVIEW
+All business travel must be approved in advance and comply with company travel policies. This guide covers the complete process from request submission to expense reimbursement.
+
+TRAVEL REQUEST SUBMISSION PROCESS
+
+Step 1: Pre-Approval Planning
+Before submitting a travel request, ensure you have:
+- Clear business purpose and objectives
+- Proposed travel dates and duration
+- Estimated budget (transportation, accommodation, meals, incidentals)
+- Manager approval in principle
+- Meeting agendas, conference details, or client invitations (if applicable)
+
+Step 2: Submit Travel Request
+1. Log into the Operations Portal at https://ops.techcorp.com
+2. Navigate to "Travel" > "New Travel Request"
+3. Complete all required fields:
+   - Traveler Information: Name, employee ID, department
+   - Trip Details:
+     * Purpose of travel (conference, client meeting, training, etc.)
+     * Destination(s) and dates
+     * Departure and return times
+     * Number of travelers
+   - Estimated Expenses:
+     * Airfare/train/bus tickets
+     * Hotel accommodations
+     * Ground transportation (rental car, taxis, rideshare)
+     * Meals and per diem
+     * Conference fees or registration costs
+     * Miscellaneous expenses
+   - Business Justification: Detailed explanation of business need
+   - Supporting Documents: Attach invitations, agendas, or meeting confirmations
+
+4. Select Approval Workflow:
+   - Manager approval (required for all requests)
+   - Finance approval (required for expenses over $1,000)
+   - Executive approval (required for expenses over $5,000 or international travel)
+
+5. Submit request and await approval notifications
+
+APPROVAL TIMELINES AND DEADLINES
+- Standard requests: Submit at least 2 weeks in advance
+- Domestic travel: Minimum 1 week notice required
+- International travel: Minimum 3 weeks notice required (additional documentation may be required)
+- Emergency travel: Contact your manager and finance department immediately
+- Late submissions: May not be approved or may incur higher costs
+
+TRAVEL BOOKING PROCESS
+
+Once Approved:
+1. You'll receive email confirmation with approval details
+2. Travel Coordinator will contact you within 2 business days
+3. Coordinate booking preferences:
+   - Preferred airlines and flight times
+   - Hotel preferences and location requirements
+   - Ground transportation needs
+   - Special accommodations or dietary requirements
+
+Company-Preferred Vendors:
+- Airlines: Corporate accounts with major carriers (discounted rates)
+- Hotels: Preferred hotel chains with negotiated rates
+- Car Rentals: Enterprise, Hertz, or Avis corporate accounts
+- Travel Agencies: Corporate travel management company handles bookings
+
+Self-Booking (If Authorized):
+- Use company-approved booking platforms
+- Follow per diem and accommodation guidelines
+- Save all receipts for reimbursement
+- Submit booking confirmation to travel coordinator
+
+TRAVEL EXPENSE POLICIES
+
+Per Diem Rates (Daily Allowances):
+- Domestic Travel: $75/day for meals and incidentals
+- International Travel: Varies by country (see IT Portal for rates)
+- Hotel: Company-approved hotels within reasonable rates for destination
+- Transportation: Economy class for flights under 4 hours, business class for longer flights
+
+Reimbursable Expenses:
+- Airfare, train, or bus tickets
+- Hotel accommodations (single occupancy standard)
+- Ground transportation (taxis, rideshare, rental cars, parking)
+- Meals (within per diem limits)
+- Business-related phone calls and internet
+- Conference fees and registration
+- Tips and gratuities (within reasonable limits)
+
+Non-Reimbursable Expenses:
+- Personal entertainment and activities
+- Alcohol (unless part of business meal)
+- Personal shopping or gifts
+- Spouse or family travel expenses
+- Travel insurance (covered by company policy)
+- Expenses exceeding per diem without justification
+
+EXPENSE REPORTING AND REIMBURSEMENT
+
+Step 1: Collect Documentation
+During your trip, keep all receipts for:
+- Transportation (boarding passes, tickets, receipts)
+- Accommodation (hotel invoices)
+- Meals (itemized receipts)
+- Other business expenses (receipts required for expenses over $25)
+
+Step 2: Submit Expense Report
+1. Log into Operations Portal within 5 business days of return
+2. Navigate to "Travel" > "Expense Reports" > "New Report"
+3. Enter trip details and attach all receipts
+4. Categorize expenses appropriately
+5. Add notes for any unusual expenses
+6. Submit for manager approval
+
+Step 3: Reimbursement Processing
+- Manager reviews and approves expense report
+- Finance processes payment
+- Reimbursement typically received within 10 business days
+- Payment method: Direct deposit to your bank account on file
+
+INTERNATIONAL TRAVEL REQUIREMENTS
+- Valid passport (check expiration date - must be valid 6 months beyond travel dates)
+- Business visas if required (HR assists with visa applications)
+- Travel insurance (automatically provided by company)
+- Health and safety briefings (required for certain destinations)
+- Register with embassy/consulate if traveling to high-risk areas
+- Review country-specific travel advisories
+
+TRAVEL SAFETY AND SECURITY
+- Register your travel itinerary with security@techcorp.com
+- Keep emergency contact information accessible
+- Use company-approved travel booking services
+- Follow local laws and customs
+- Report any security incidents immediately
+- Use secure Wi-Fi or VPN when accessing company systems
+
+CANCELLATION AND CHANGES
+- Changes to approved travel: Submit modification request through portal
+- Cancellations: Notify travel coordinator and manager immediately
+- Cancellation fees: Company covers reasonable cancellation costs
+- No-show penalties: Employee responsible unless emergency situation
+
+FREQUENTLY ASKED QUESTIONS
+
+Q: Can I extend my trip for personal time?
+A: Yes, but personal days are at your expense. Book return flight separately for personal extension.
+
+Q: Can I use personal credit card for travel?
+A: Yes, but company credit cards are available for frequent travelers. Contact finance for card application.
+
+Q: What if my expenses exceed the estimate?
+A: Submit justification for additional expenses. Approval depends on business necessity and reasonableness.
+
+Q: Can I combine business and personal travel?
+A: Yes, but only business portion is reimbursable. Clearly separate business and personal expenses.
+
+Q: What if I need to cancel my trip?
+A: Notify travel coordinator immediately. Company covers cancellation fees for business reasons.
+
+SUPPORT AND CONTACT
+- Travel Coordinator: travel@techcorp.com, ext. 3000
+- Operations Portal: https://ops.techcorp.com
+- Finance Department: finance@techcorp.com, ext. 4000
+- Emergency Travel Support: emergency-travel@techcorp.com (24/7)
+
+Remember: Plan ahead, keep receipts, and follow company policies to ensure smooth travel and timely reimbursement.

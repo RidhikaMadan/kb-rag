@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: rag_chatbot_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: rag_chatbot
+    networks:
+      - rag_network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag_chatbot_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./KB:/app/KB
+      - ./models:/app/models
+      - ./index.faiss:/app/index.faiss
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MONGODB_URI=mongodb://mongodb:27017/
+      - MONGODB_DB=rag_chatbot
+      - KB_FOLDER=KB
+      - TOKENIZERS_PARALLELISM=false
+    depends_on:
+      - mongodb
+    networks:
+      - rag_network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: rag_chatbot_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - rag_network
+
+volumes:
+  mongodb_data:
+
+networks:
+  rag_network:
+    driver: bridge

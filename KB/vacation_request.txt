@@ -1,0 +1,163 @@
+VACATION LEAVE REQUEST AND TIME-OFF MANAGEMENT
+
+OVERVIEW
+TechCorp recognizes the importance of work-life balance and encourages employees to take time off to recharge. This guide covers the complete process for requesting vacation leave, understanding accrual policies, and managing your time-off balance.
+
+VACATION ACCRUAL POLICIES
+
+Accrual Rates by Tenure:
+- 0-1 years: 10 days (80 hours) per year, accrues at 0.0385 hours per hour worked
+- 1-3 years: 15 days (120 hours) per year, accrues at 0.0577 hours per hour worked
+- 3-5 years: 20 days (160 hours) per year, accrues at 0.0769 hours per hour worked
+- 5-10 years: 25 days (200 hours) per year, accrues at 0.0962 hours per hour worked
+- 10+ years: 30 days (240 hours) per year, accrues at 0.1154 hours per hour worked
+
+Accrual Details:
+- Vacation time accrues with each pay period
+- Accrual begins on first day of employment
+- Maximum carryover: 5 days (40 hours) can be carried to next year
+- Unused vacation above carryover limit is forfeited on December 31
+- Accrual stops when you reach the maximum balance
+
+CHECKING YOUR VACATION BALANCE
+1. Log into HR Portal at https://hr.techcorp.com
+2. Navigate to "Time Off" > "Balance Summary"
+3. View:
+   - Accrued hours (earned but not used)
+   - Available hours (can be used)
+   - Pending requests (approved but not yet taken)
+   - Scheduled time off (upcoming approved leave)
+
+VACATION REQUEST PROCESS
+
+Step 1: Plan Your Time Off
+Before submitting a request:
+- Check your available vacation balance
+- Review team calendar for potential conflicts
+- Identify critical project deadlines
+- Plan coverage for your responsibilities
+- Consider peak business periods (avoid if possible)
+
+Step 2: Discuss with Your Manager
+1. Schedule a brief conversation with your manager
+2. Discuss:
+   - Proposed dates and duration
+   - Impact on current projects
+   - Coverage arrangements
+   - Any critical deadlines during your absence
+3. Get preliminary approval before formal submission
+
+Step 3: Submit Vacation Request
+1. Log into HR Portal: https://hr.techcorp.com
+2. Navigate to "Time Off" > "Request Time Off"
+3. Complete the request form:
+   - Select "Vacation" as leave type
+   - Enter start date and end date
+   - Specify number of days/hours requested
+   - Add reason (optional but recommended)
+   - Note coverage arrangements
+   - Attach any supporting documents if needed
+4. Review your request summary
+5. Submit for manager approval
+
+Step 4: Approval Process
+- Manager receives notification within 24 hours
+- Manager reviews and approves/denies within 3 business days
+- You receive email notification of decision
+- Approved requests appear in your time-off calendar
+- Denied requests include reason for denial
+
+ADVANCE NOTICE REQUIREMENTS
+- Standard requests: Minimum 2 weeks advance notice
+- Extended leave (5+ days): Minimum 4 weeks advance notice
+- Peak periods (holidays, end of quarter): Minimum 4 weeks notice
+- Emergency situations: Contact manager immediately, approval at manager's discretion
+
+BLACKOUT PERIODS
+Certain periods may have restricted vacation:
+- End of fiscal quarters (last 2 weeks)
+- Major product launches (as announced)
+- Critical project deadlines (team-specific)
+- Holiday periods (limited slots available)
+
+Check with your manager or HR for current blackout periods.
+
+COVERAGE AND DELEGATION
+Before taking vacation:
+1. Identify key responsibilities that need coverage
+2. Delegate tasks to team members
+3. Document procedures for coverage person
+4. Set up out-of-office email and voicemail
+5. Provide emergency contact information to manager
+6. Complete or postpone urgent tasks
+
+VACATION REQUEST APPROVAL CRITERIA
+Managers consider:
+- Available vacation balance
+- Advance notice provided
+- Team coverage and workload
+- Business needs and deadlines
+- Blackout periods
+- Previous vacation patterns
+- Fair distribution among team members
+
+CANCELLING OR MODIFYING REQUESTS
+- Before approval: Can cancel or modify in HR Portal
+- After approval: Contact manager to discuss changes
+- Last-minute cancellations: Notify manager and HR immediately
+- Modifications: Submit new request, note it's a modification
+
+EXTENDED LEAVE
+For vacation requests exceeding 2 weeks:
+- Requires additional approval from department head
+- May require coverage plan documentation
+- Consider impact on project timelines
+- Discuss with HR for extended leave options
+
+VACATION PAYOUT
+- Upon termination: Unused accrued vacation paid out
+- Payout calculated at current salary rate
+- Received in final paycheck
+- Subject to applicable taxes
+
+HOLIDAYS AND VACATION
+- Company holidays don't count against vacation balance
+- If holiday falls during vacation, you're paid for holiday
+- Plan vacation around holidays to maximize time off
+
+FREQUENTLY ASKED QUESTIONS
+
+Q: Can I take vacation during my probationary period?
+A: Generally discouraged, but may be approved for exceptional circumstances. Discuss with manager.
+
+Q: What if I'm sick during my vacation?
+A: Vacation time is used. Sick leave cannot be substituted retroactively.
+
+Q: Can I split my vacation into multiple shorter periods?
+A: Yes, as long as you have available balance and provide proper notice.
+
+Q: What happens if I don't use all my vacation?
+A: Up to 5 days can carry over to next year. Balance above that is forfeited.
+
+Q: Can I request vacation for the same day I submit?
+A: Emergency requests may be approved at manager's discretion, but 2 weeks notice is standard.
+
+Q: What if my manager denies my request?
+A: Discuss reasons for denial. You can resubmit with adjusted dates or appeal to HR if you believe denial is unfair.
+
+BEST PRACTICES
+- Plan vacation well in advance
+- Coordinate with team members to avoid coverage gaps
+- Use vacation time regularly (don't let it accumulate unnecessarily)
+- Check blackout periods before planning
+- Set clear out-of-office messages
+- Disconnect from work during vacation (unless emergency)
+- Return refreshed and ready to contribute
+
+SUPPORT AND CONTACT
+- HR Portal: https://hr.techcorp.com
+- HR Department: hr@techcorp.com, ext. 1000
+- Time-Off Questions: timeoff@techcorp.com
+- Manager: Discuss vacation planning during one-on-ones
+
+Remember: Taking time off is important for your well-being and productivity. Plan ahead and communicate with your team!
