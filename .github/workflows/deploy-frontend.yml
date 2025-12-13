@@ -1,0 +1,87 @@
+# GitHub Actions workflow for deploying frontend to Firebase Hosting
+# Automatically deploys when you push to main branch
+
+name: Deploy Frontend to Firebase
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'frontend/**'
+      - 'firebase.json'
+      - '.firebaserc'
+      - '.github/workflows/deploy-frontend.yml'
+  workflow_dispatch:  # Allows manual triggering
+
+env:
+  PROJECT_ID: kb-rag-project
+  REGION: us-central1
+
+jobs:
+  deploy-frontend:
+    permissions:
+      contents: read
+      id-token: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Get Backend URL
+        id: backend-url
+        run: |-
+          BACKEND_URL=$(gcloud run services describe kb-rag-backend \
+            --region ${{ env.REGION }} \
+            --format 'value(status.url)' 2>/dev/null || echo "")
+          if [ -z "$BACKEND_URL" ]; then
+            echo "⚠️ Backend not found, using default"
+            BACKEND_URL="https://kb-rag-backend-r3jvnlegaq-uc.a.run.app"
+          fi
+          echo "url=$BACKEND_URL" >> $GITHUB_OUTPUT
+          echo "Backend URL: $BACKEND_URL"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: ./frontend
+        env:
+          VITE_API_URL: ${{ steps.backend-url.outputs.url }}
+        run: npm run build
+
+      - name: Setup Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Deploy to Firebase
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        run: |-
+          firebase deploy --only hosting \
+            --project ${{ env.PROJECT_ID }} \
+            --token ${{ secrets.FIREBASE_TOKEN }} \
+            --non-interactive
+
+      - name: Get Firebase URL
+        run: |-
+          echo "✅ Frontend deployed to:"
+          echo "   https://${{ env.PROJECT_ID }}.web.app"
+          echo "   https://${{ env.PROJECT_ID }}.firebaseapp.com"
+

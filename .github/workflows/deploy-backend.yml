@@ -1,0 +1,91 @@
+# GitHub Actions workflow for deploying backend to GCP Cloud Run
+# Automatically deploys when you push to main branch
+
+name: Deploy Backend to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'backend/**'
+      - 'Dockerfile.cloudrun'
+      - 'requirements-cloud.txt'
+      - 'KB/**'
+      - 'cloudbuild.yaml'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:  # Allows manual triggering
+
+env:
+  PROJECT_ID: kb-rag-project
+  SERVICE_NAME: kb-rag-backend
+  REGION: us-central1
+
+jobs:
+  deploy-backend:
+    permissions:
+      contents: read
+      id-token: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker
+
+      - name: Build and Push Container
+        run: |-
+          gcloud builds submit \
+            --tag gcr.io/${{ env.PROJECT_ID }}/kb-rag:${{ github.sha }} \
+            --dockerfile=Dockerfile.cloudrun \
+            --quiet
+
+      - name: Deploy to Cloud Run
+        run: |-
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image gcr.io/${{ env.PROJECT_ID }}/kb-rag:${{ github.sha }} \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --memory 2Gi \
+            --cpu 2 \
+            --timeout 600 \
+            --max-instances 10 \
+            --min-instances 0 \
+            --set-env-vars "MONGODB_DB=rag_chatbot,KB_FOLDER=KB,TOKENIZERS_PARALLELISM=false" \
+            --update-secrets "MONGODB_URI=mongodb-uri:latest,OPENAI_API_KEY=openai-api-key:latest" \
+            --quiet
+
+      - name: Get Service URL
+        id: service-url
+        run: |-
+          URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
+            --region ${{ env.REGION }} \
+            --format 'value(status.url)')
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "✅ Backend deployed to: $URL"
+
+      - name: Comment on PR (if PR)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Backend deployed to: ${{ steps.service-url.outputs.url }}'
+            })
+

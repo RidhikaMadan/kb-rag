@@ -212,7 +212,30 @@ index.faiss/
 *.pkl
 .env.local
 .env.production
+.env
 frontend/dist/
 frontend/node_modules/
 *.log
 .DS_Store
+
+# GCP Service Account Keys (if using GitHub Actions)
+key.json
+*-key.json
+*.json.key
+gcp-sa-key.json
+
+# Deployment scripts (not needed in repo - CI/CD handles deployment)
+deploy-*.sh
+setup-*.sh
+init-*.sh
+
+# Firebase cache
+.firebase/
+
+# Deployment documentation (optional - can be committed if you want)
+# GCP_DEPLOYMENT.md
+# GCP_QUICK_START.md
+# FIREBASE_DEPLOYMENT.md
+# MONGODB_SETUP.md
+# DEPLOYMENT_SUMMARY.md
+# CI_CD_GUIDE.md
