@@ -15,9 +15,10 @@ A Retrieval-Augmented Generation (RAG) system designed to answer questions from 
 
 ---
 
-<img width="1088" height="727" alt="Screenshot 2025-12-13 at 3 04 14 PM" src="https://github.com/user-attachments/assets/a0ecb5d4-31f5-4ee4-a1a8-17b64cac26a3" />
-<img width="1064" height="714" alt="Screenshot 2025-12-13 at 3 06 04 PM" src="https://github.com/user-attachments/assets/c14585da-8d4e-4a0b-aece-506ebed0be98" />
-<img width="1068" height="716" alt="Screenshot 2025-12-13 at 3 06 37 PM" src="https://github.com/user-attachments/assets/043d2db7-1b02-47de-893c-e62d7e379302" />
+<img src="https://github.com/user-attachments/assets/a0ecb5d4-31f5-4ee4-a1a8-17b64cac26a3" alt="Landing" width="700"/>
+<img src="https://github.com/user-attachments/assets/c14585da-8d4e-4a0b-aece-506ebed0be98" alt="Query" width="700"/>
+<img src="https://github.com/user-attachments/assets/043d2db7-1b02-47de-893c-e62d7e379302" alt="Retrieved Sources" width="700"/>
+
 
 ### Production Features
 - **Dockerized**: Docker Compose setup for easy deployment
