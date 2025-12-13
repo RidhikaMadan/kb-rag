@@ -1,6 +1,6 @@
 # RAG Knowledge Base Assistant with Multi-Turn Reasoning
 
-A Retrieval-Augmented Generation (RAG) system to answer questions from a knowledge base with OpenAI integration, local Llama support for privacy, multi-turn reasoning, session tracking, analytics, and knowledge base management.
+A Retrieval-Augmented Generation (RAG) system designed to answer questions from a knowledge base with OpenAI integration, local Llama support for privacy, multi-turn reasoning, session tracking, analytics, and knowledge base management.
 
 ## Features
 
@@ -13,6 +13,11 @@ A Retrieval-Augmented Generation (RAG) system to answer questions from a knowled
 - **Intent Classification**: Zero-shot intent detection for optimized responses
 - **RAG with Reranking**: FAISS vector search with cross-encoder reranking
 
+---
+
+<img width="1088" height="727" alt="Screenshot 2025-12-13 at 3 04 14 PM" src="https://github.com/user-attachments/assets/a0ecb5d4-31f5-4ee4-a1a8-17b64cac26a3" />
+<img width="1064" height="714" alt="Screenshot 2025-12-13 at 3 06 04 PM" src="https://github.com/user-attachments/assets/c14585da-8d4e-4a0b-aece-506ebed0be98" />
+<img width="1068" height="716" alt="Screenshot 2025-12-13 at 3 06 37 PM" src="https://github.com/user-attachments/assets/043d2db7-1b02-47de-893c-e62d7e379302" />
 
 ### Production Features
 - **Dockerized**: Docker Compose setup for easy deployment
@@ -21,7 +26,6 @@ A Retrieval-Augmented Generation (RAG) system to answer questions from a knowled
 - **FastAPI Backend**: High-performance async API
 - **React UI**: Responsive chat interface with a clean layout
 
----
 ## Prerequisites
 
 - Python 3.9+
