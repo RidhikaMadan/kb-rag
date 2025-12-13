@@ -1,6 +1,6 @@
 # RAG Knowledge Base Assistant with Multi-Turn Reasoning
 
-A Retrieval-Augmented Generation (RAG) system with OpenAI integration, local Llama support for privacy, multi-turn reasoning, session tracking, analytics, and knowledge base management.
+A Retrieval-Augmented Generation (RAG) system to answer questions from a knowledge base with OpenAI integration, local Llama support for privacy, multi-turn reasoning, session tracking, analytics, and knowledge base management.
 
 ## Features
 
