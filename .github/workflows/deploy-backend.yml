@@ -55,10 +55,17 @@ jobs:
           # Push to Container Registry
           docker push $IMAGE_TAG
 
+      - name: Remove old secret references
+        run: |-
+          # Remove secret references first (if they exist)
+          # This must be done in a separate step before setting env vars
+          gcloud run services update ${{ env.SERVICE_NAME }} \
+            --region ${{ env.REGION }} \
+            --remove-secrets "MONGODB_URI,OPENAI_API_KEY" \
+            --quiet || echo "No secrets to remove (this is OK)"
+      
       - name: Deploy to Cloud Run
         run: |-
-          # Remove secret references first (if they exist), then set as env vars
-          # This handles the case where secrets were previously configured
           gcloud run deploy ${{ env.SERVICE_NAME }} \
             --image gcr.io/${{ env.PROJECT_ID }}/kb-rag:${{ github.sha }} \
             --region ${{ env.REGION }} \
@@ -70,7 +77,6 @@ jobs:
             --cpu-boost \
             --max-instances 10 \
             --min-instances 0 \
-            --remove-secrets "MONGODB_URI,OPENAI_API_KEY" \
             --set-env-vars "MONGODB_DB=rag_chatbot,KB_FOLDER=KB,TOKENIZERS_PARALLELISM=false,MONGODB_URI=${{ secrets.MONGODB_URI }},OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" \
             --port 8080 \
             --quiet
