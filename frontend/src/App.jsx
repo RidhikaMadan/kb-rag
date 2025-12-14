@@ -235,7 +235,7 @@ function App() {
               className="settings-button"
               onClick={() => setShowSettings(!showSettings)}
             >
-              ⚙️ Settings
+              Settings
             </button>
             <button 
               className="upload-button"
@@ -244,7 +244,7 @@ function App() {
                 setShowUpload(!showUpload)
               }}
             >
-              📁 View or Upload KB
+              View or Upload KB
             </button>
             <button 
               className="analytics-button"
@@ -253,7 +253,7 @@ function App() {
                 loadAnalytics()
               }}
             >
-              📊 Analytics
+               Analytics
             </button>
             <button className="clear-button" onClick={handleClearChat}>
               Clear Chat
