@@ -57,19 +57,37 @@ jobs:
 
       - name: Deploy to Cloud Run
         run: |-
-          gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image gcr.io/${{ env.PROJECT_ID }}/kb-rag:${{ github.sha }} \
-            --region ${{ env.REGION }} \
-            --platform managed \
-            --allow-unauthenticated \
-            --memory 2Gi \
-            --cpu 2 \
-            --timeout 600 \
-            --max-instances 10 \
-            --min-instances 0 \
-            --set-env-vars "MONGODB_DB=rag_chatbot,KB_FOLDER=KB,TOKENIZERS_PARALLELISM=false" \
-            --update-secrets "MONGODB_URI=mongodb-uri:latest,OPENAI_API_KEY=openai-api-key:latest" \
-            --quiet
+          # Try to use secrets if they exist, otherwise use environment variables from GitHub secrets
+          if gcloud secrets describe mongodb-uri --quiet &>/dev/null && gcloud secrets describe openai-api-key --quiet &>/dev/null; then
+            # Use Secret Manager (if secrets exist)
+            gcloud run deploy ${{ env.SERVICE_NAME }} \
+              --image gcr.io/${{ env.PROJECT_ID }}/kb-rag:${{ github.sha }} \
+              --region ${{ env.REGION }} \
+              --platform managed \
+              --allow-unauthenticated \
+              --memory 2Gi \
+              --cpu 2 \
+              --timeout 600 \
+              --max-instances 10 \
+              --min-instances 0 \
+              --set-env-vars "MONGODB_DB=rag_chatbot,KB_FOLDER=KB,TOKENIZERS_PARALLELISM=false" \
+              --update-secrets "MONGODB_URI=mongodb-uri:latest,OPENAI_API_KEY=openai-api-key:latest" \
+              --quiet
+          else
+            # Use environment variables from GitHub secrets (fallback)
+            gcloud run deploy ${{ env.SERVICE_NAME }} \
+              --image gcr.io/${{ env.PROJECT_ID }}/kb-rag:${{ github.sha }} \
+              --region ${{ env.REGION }} \
+              --platform managed \
+              --allow-unauthenticated \
+              --memory 2Gi \
+              --cpu 2 \
+              --timeout 600 \
+              --max-instances 10 \
+              --min-instances 0 \
+              --set-env-vars "MONGODB_DB=rag_chatbot,KB_FOLDER=KB,TOKENIZERS_PARALLELISM=false,MONGODB_URI=${{ secrets.MONGODB_URI }},OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" \
+              --quiet
+          fi
 
       - name: Get Service URL
         id: service-url
