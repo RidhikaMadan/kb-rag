@@ -1,5 +1,5 @@
 # GitHub Actions workflow for deploying frontend to Firebase Hosting
-# Automatically deploys when you push to main branch
+# Automatically deploys when pushing to main branch
 
 name: Deploy Frontend to Firebase
 
@@ -13,7 +13,7 @@ on:
       - 'firebase.json'
       - '.firebaserc'
       - '.github/workflows/deploy-frontend.yml'
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch: 
 
 env:
   PROJECT_ID: kb-rag-project
@@ -46,7 +46,7 @@ jobs:
             --region ${{ env.REGION }} \
             --format 'value(status.url)' 2>/dev/null || echo "")
           if [ -z "$BACKEND_URL" ]; then
-            echo "⚠️ Backend not found, using default"
+            echo "Backend not found, using default"
             BACKEND_URL="https://kb-rag-backend-r3jvnlegaq-uc.a.run.app"
           fi
           echo "url=$BACKEND_URL" >> $GITHUB_OUTPUT
@@ -81,7 +81,7 @@ jobs:
 
       - name: Get Firebase URL
         run: |-
-          echo "✅ Frontend deployed to:"
+          echo "Frontend deployed to:"
           echo "   https://${{ env.PROJECT_ID }}.web.app"
           echo "   https://${{ env.PROJECT_ID }}.firebaseapp.com"
 

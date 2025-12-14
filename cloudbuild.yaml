@@ -1,5 +1,4 @@
 # Cloud Build configuration for automatic deployment
-# This file is used by Cloud Build triggers to automatically deploy your application
 
 steps:
   # Build the Docker image

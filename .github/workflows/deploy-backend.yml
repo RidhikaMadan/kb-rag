@@ -1,5 +1,5 @@
 # GitHub Actions workflow for deploying backend to GCP Cloud Run
-# Automatically deploys when you push to main branch
+# Automatically deploys when pushing to main
 
 name: Deploy Backend to Cloud Run
 
@@ -75,7 +75,7 @@ jobs:
             --region ${{ env.REGION }} \
             --format 'value(status.url)')
           echo "url=$URL" >> $GITHUB_OUTPUT
-          echo "✅ Backend deployed to: $URL"
+          echo "Backend deployed to: $URL"
 
       - name: Comment on PR (if PR)
         if: github.event_name == 'pull_request'
@@ -86,6 +86,6 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '✅ Backend deployed to: ${{ steps.service-url.outputs.url }}'
+              body: 'Backend deployed to: ${{ steps.service-url.outputs.url }}'
             })
 
