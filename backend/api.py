@@ -33,7 +33,7 @@ app = FastAPI(title="Advanced RAG Chatbot API", version="2.0.0")
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:4173", "http://localhost:80"],
+    allow_origins=["*"],  # Allow all origins for Cloud Storage frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -54,12 +54,17 @@ async def startup_event():
     print("Starting RAG Chatbot Backend...")
     print("="*60)
     
-    # Initialize database with retry logic
+    # Initialize database with retry logic (reduced retries for Cloud Run)
     print("\n[1/3] Connecting to MongoDB...")
-    max_retries = 10  # Reduced from 30 to avoid long waits
-    retry_delay = 2
+    max_retries = 3  # Reduced for Cloud Run - fail fast if not configured
+    retry_delay = 1
     mongodb_uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
-    print(f"  Connection string: {mongodb_uri}")
+    
+    # Don't print full connection string in production (security)
+    if mongodb_uri.startswith("mongodb+srv://"):
+        print(f"  Using MongoDB Atlas connection")
+    else:
+        print(f"  Connection string: {mongodb_uri}")
     
     for attempt in range(max_retries):
         try:
@@ -70,48 +75,43 @@ async def startup_event():
         except Exception as e:
             error_msg = str(e)
             if attempt < max_retries - 1:
-                if attempt == 0:
-                    print(f"  Connection failed: {error_msg}")
-                    print(f"  Retrying MongoDB connection (will try {max_retries} times)...")
-                elif attempt % 3 == 0:  # Show progress every 3 attempts
-                    print(f"  Still retrying... (attempt {attempt + 1}/{max_retries})")
+                print(f"  Retrying MongoDB connection (attempt {attempt + 1}/{max_retries})...")
                 await asyncio.sleep(retry_delay)
             else:
-                print(f"\n✗ Failed to connect to MongoDB after {max_retries} attempts.")
-                print(f"  Error: {error_msg}")
-                print("\n  To fix this, choose one option:")
-                print("\n  Option 1: Install MongoDB locally")
-                print("    macOS:")
-                print("      brew tap mongodb/brew")
-                print("      brew install mongodb-community")
-                print("      brew services start mongodb-community")
-                print("    Windows:")
-                print("      choco install mongodb")
-                print("      # Or download from: https://www.mongodb.com/try/download/community")
-                print("      net start MongoDB")
-                print("\n  Option 2: Use Docker:")
-                print("    docker run -d -p 27017:27017 --name mongodb mongo:7")
-                print("\n  Option 3: Use MongoDB Atlas (cloud):")
-                print("    Sign up at https://www.mongodb.com/cloud/atlas")
-                print("    Then set MONGODB_URI to your Atlas connection string")
-                print(f"\n  Current MONGODB_URI: {mongodb_uri}")
-                raise
+                print(f"\n⚠ Warning: Could not connect to MongoDB: {error_msg}")
+                print("  The service will start but database features will not work.")
+                print("  Make sure MONGODB_URI environment variable is set correctly.")
+                # Don't raise - allow service to start without DB for health checks
+                db = None
     
-    # Pre-initialize RAG engine to load models during startup (not on first request)
-    print("\n[2/3] Initializing RAG engine...")
-    print("  This may take 30-60 seconds when using local models...")
+    # Pre-initialize RAG engine (lazy load for faster startup in Cloud Run)
+    print("\n[2/3] Checking RAG engine configuration...")
     try:
-        engine = get_rag_engine()
-        print("✓ RAG engine initialized successfully.")
+        # Just verify configuration, don't fully initialize (lazy load)
+        openai_api_key = os.getenv("OPENAI_API_KEY")
+        kb_folder = os.getenv("KB_FOLDER", "KB")
+        
+        if not openai_api_key:
+            print("⚠ Warning: OPENAI_API_KEY not set. RAG will not work until configured.")
+        else:
+            print("✓ OpenAI API key configured.")
+        
+        if not os.path.exists(kb_folder) or not os.listdir(kb_folder):
+            print(f"⚠ Warning: KB folder '{kb_folder}' is empty or missing.")
+        else:
+            print(f"✓ KB folder found with {len(os.listdir(kb_folder))} files.")
+        
+        print("  RAG engine will be initialized on first request (lazy loading).")
     except Exception as e:
-        print(f"⚠ Warning: Could not pre-initialize RAG engine: {e}")
+        print(f"⚠ Warning: Could not verify RAG configuration: {e}")
         print("  RAG engine will be initialized on first request.")
     
     print("\n[3/3] Startup complete!")
     print("="*60)
     print("Backend is ready to accept requests.")
-    print("API available at: http://0.0.0.0:8000")
-    print("API docs available at: http://0.0.0.0:8000/docs")
+    port = os.getenv("PORT", "8080")
+    print(f"API available at: http://0.0.0.0:{port}")
+    print(f"API docs available at: http://0.0.0.0:{port}/docs")
     print("="*60 + "\n")
 
 
@@ -216,24 +216,28 @@ async def root():
 
 @app.get("/health", response_model=HealthResponse)
 async def health():
-    """Detailed health check"""
+    """Detailed health check - lightweight for Cloud Run"""
     try:
-        engine = get_rag_engine()
-        local_available = os.path.exists("models/Llama-3.2-3B-Instruct-Q4_K_M.gguf")
+        # Lightweight health check - don't initialize RAG engine (too slow)
         openai_available = bool(os.getenv("OPENAI_API_KEY"))
-        use_local = os.getenv("USE_LOCAL_LLM", "false").lower() == "true"
+        mongodb_available = db is not None if db else False
         
         return HealthResponse(
             status="ok",
-            message="RAG engine is ready",
+            message="Service is ready",
             models_available={
                 "openai": openai_available,
-                "local": local_available,
-                "active": "local" if use_local else "openai"
+                "mongodb": mongodb_available
             }
         )
-    except Exception:
-        raise HTTPException(status_code=500, detail="RAG engine error")
+    except Exception as e:
+        # Return 200 even on error to prevent Cloud Run from killing the container
+        # The service might still be starting up
+        return HealthResponse(
+            status="starting",
+            message=f"Service is starting: {str(e)}",
+            models_available={}
+        )
 
 
 @app.get("/chat")
