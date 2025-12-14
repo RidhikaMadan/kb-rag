@@ -58,7 +58,7 @@ jobs:
       - name: Deploy to Cloud Run
         run: |-
           # Deploy with environment variables
-          # If secrets exist, they will be replaced by env vars in this deployment
+          # --clear-secrets removes all secrets, --set-env-vars sets all env vars
           gcloud run deploy ${{ env.SERVICE_NAME }} \
             --image gcr.io/${{ env.PROJECT_ID }}/kb-rag:${{ github.sha }} \
             --region ${{ env.REGION }} \
@@ -70,9 +70,8 @@ jobs:
             --cpu-boost \
             --max-instances 10 \
             --min-instances 0 \
-            --update-env-vars "MONGODB_DB=rag_chatbot,KB_FOLDER=KB,TOKENIZERS_PARALLELISM=false" \
-            --set-env-vars "MONGODB_URI=${{ secrets.MONGODB_URI }},OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" \
             --clear-secrets \
+            --set-env-vars "MONGODB_DB=rag_chatbot,KB_FOLDER=KB,TOKENIZERS_PARALLELISM=false,MONGODB_URI=${{ secrets.MONGODB_URI }},OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" \
             --port 8080 \
             --quiet
 
