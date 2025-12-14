@@ -8,10 +8,7 @@ const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'ht
 const SAMPLE_QUERIES = [
   "How do I reset my password?",
   "What is the vacation policy?",
-  "How do I set up VPN?",
-  "What are the benefits enrollment options?",
-  "How do I submit a travel request?",
-  "What is the software installation process?"
+  "How do I set up VPN?"
 ]
 
 function App() {
@@ -25,7 +22,6 @@ function App() {
   ])
   const [isLoading, setIsLoading] = useState(false)
   const [sessionId, setSessionId] = useState(null)
-  const [showSettings, setShowSettings] = useState(false)
   const [showUpload, setShowUpload] = useState(false)
   const [showViewKB, setShowViewKB] = useState(false)
   const [showAnalytics, setShowAnalytics] = useState(false)
@@ -232,12 +228,6 @@ function App() {
           </div>
           <div className="header-actions">
             <button 
-              className="settings-button"
-              onClick={() => setShowSettings(!showSettings)}
-            >
-              Settings
-            </button>
-            <button 
               className="upload-button"
               onClick={() => {
                 setShowViewKB(false)
@@ -260,19 +250,6 @@ function App() {
             </button>
           </div>
         </div>
-
-        {showSettings && (
-          <div className="settings-panel">
-            <h3>Settings</h3>
-            <div className="setting-item">
-              <p>Session ID: {sessionId || 'Not created'}</p>
-            </div>
-            <div className="setting-item">
-              <p><strong>Note:</strong> This assistant uses OpenAI by default. For local Llama usage, see README instructions.</p>
-            </div>
-            <button onClick={() => setShowSettings(false)}>Close</button>
-          </div>
-        )}
 
         {(showUpload || showViewKB) && (
           <div className="upload-panel">

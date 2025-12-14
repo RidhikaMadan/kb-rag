@@ -38,7 +38,7 @@ function ChatInput({ onSendMessage, disabled }) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
+          placeholder="Type your message..."
           className="chat-input"
           rows="1"
           disabled={disabled}
