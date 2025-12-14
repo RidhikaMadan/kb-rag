@@ -47,10 +47,13 @@ jobs:
 
       - name: Build and Push Container
         run: |-
-          gcloud builds submit \
-            --tag gcr.io/${{ env.PROJECT_ID }}/kb-rag:${{ github.sha }} \
-            --dockerfile=Dockerfile.cloudrun \
-            --quiet
+          IMAGE_TAG="gcr.io/${{ env.PROJECT_ID }}/kb-rag:${{ github.sha }}"
+          
+          # Build the Docker image using Dockerfile.cloudrun
+          docker build -t $IMAGE_TAG -f Dockerfile.cloudrun .
+          
+          # Push to Container Registry
+          docker push $IMAGE_TAG
 
       - name: Deploy to Cloud Run
         run: |-
