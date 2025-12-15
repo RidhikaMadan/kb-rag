@@ -29,7 +29,7 @@ function App() {
   const [kbFiles, setKbFiles] = useState([])
   const [selectedFile, setSelectedFile] = useState(null)
   const [fileContent, setFileContent] = useState(null)
-  const [hasUploadedKB, setHasUploadedKB] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const messagesEndRef = useRef(null)
 
   useEffect(() => {
@@ -74,7 +74,10 @@ function App() {
 
   const loadKBFiles = async () => {
     try {
-      const response = await fetch(`${API_URL}/knowledge-base/files`)
+      const url = sessionId 
+        ? `${API_URL}/knowledge-base/files?session_id=${encodeURIComponent(sessionId)}`
+        : `${API_URL}/knowledge-base/files`
+      const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
         setKbFiles(data.files || [])
@@ -101,12 +104,18 @@ function App() {
   }
 
   const deleteFile = async (filePath) => {
+    if (!sessionId) {
+      alert('Session ID is required to delete files')
+      return
+    }
+    
     if (!confirm(`Are you sure you want to delete ${filePath}?`)) {
       return
     }
     
     try {
-      const response = await fetch(`${API_URL}/knowledge-base/files/${encodeURIComponent(filePath)}`, {
+      const url = `${API_URL}/knowledge-base/files/${encodeURIComponent(filePath)}?session_id=${encodeURIComponent(sessionId)}`
+      const response = await fetch(url, {
         method: 'DELETE'
       })
       if (response.ok) {
@@ -218,6 +227,7 @@ function App() {
       formData.append('session_id', sessionId)
     }
 
+    setIsUploading(true)
     try {
       const response = await fetch(`${API_URL}/knowledge-base/upload`, {
         method: 'POST',
@@ -226,9 +236,8 @@ function App() {
 
       if (response.ok) {
         const data = await response.json()
-        alert(`Successfully uploaded ${data.file_count} file(s). Default KB has been replaced.`)
+        alert(`Successfully uploaded ${data.file_count} file(s) to your session`)
         setShowUpload(false)
-        setHasUploadedKB(true)
         loadAnalytics()
         loadKBFiles()
       } else {
@@ -238,6 +247,8 @@ function App() {
     } catch (error) {
       console.error('Upload error:', error)
       alert('Error uploading files. Please try again.')
+    } finally {
+      setIsUploading(false)
     }
   }
 
@@ -346,12 +357,54 @@ function App() {
                   type="file"
                   accept=".txt,.md,.pdf,.zip"
                   multiple
+                  disabled={isUploading}
                   onChange={(e) => {
                     if (e.target.files && e.target.files.length > 0) {
                       handleFileUpload(e.target.files)
                     }
                   }}
                 />
+                {isUploading && (
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '12px', 
+                    marginTop: '16px',
+                    color: '#667eea',
+                    fontWeight: '500'
+                  }}>
+                    <div className="typing-indicator" style={{ 
+                      display: 'flex', 
+                      gap: '4px', 
+                      padding: '8px 0'
+                    }}>
+                      <span style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        background: '#667eea',
+                        animation: 'typing 1.4s infinite'
+                      }}></span>
+                      <span style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        background: '#667eea',
+                        animation: 'typing 1.4s infinite',
+                        animationDelay: '0.2s'
+                      }}></span>
+                      <span style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        background: '#667eea',
+                        animation: 'typing 1.4s infinite',
+                        animationDelay: '0.4s'
+                      }}></span>
+                    </div>
+                    <span>Uploading files...</span>
+                  </div>
+                )}
               </div>
             )}
 
@@ -377,27 +430,39 @@ function App() {
                               <span className="file-name">{file.filename}</span>
                               <span className="file-info">
                                 {file.type} • {formatFileSize(file.size)}
+                                {file.is_session_file && ' • (Your file)'}
                               </span>
                             </div>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                deleteFile(file.path)
-                              }}
-                              style={{
-                                background: '#ff4444',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                padding: '4px 8px',
-                                cursor: 'pointer',
-                                fontSize: '12px',
-                                marginLeft: '8px'
-                              }}
-                              title="Delete file"
-                            >
-                              Delete
-                            </button>
+                            {file.is_session_file && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  deleteFile(file.path)
+                                }}
+                                style={{
+                                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '4px',
+                                  padding: '4px 8px',
+                                  cursor: 'pointer',
+                                  fontSize: '12px',
+                                  marginLeft: '8px',
+                                  transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.target.style.opacity = '0.9'
+                                  e.target.style.transform = 'translateY(-1px)'
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.target.style.opacity = '1'
+                                  e.target.style.transform = 'translateY(0)'
+                                }}
+                                title="Delete file"
+                              >
+                                Delete
+                              </button>
+                            )}
                           </li>
                         ))}
                       </ul>
@@ -475,7 +540,7 @@ function App() {
         )}
         
         <div className="messages-container">
-          {messages.length === 1 && !hasUploadedKB && (
+          {messages.length === 1 && (
             <div className="sample-queries">
               <h3>Try asking:</h3>
               <div className="sample-queries-grid">

@@ -423,32 +423,22 @@ async def upload_knowledge_base(
     user_id: Optional[str] = Form(None),
     kb_name: Optional[str] = Form(None)
 ):
-    """Upload knowledge base files - replaces default KB completely"""
+    """Upload knowledge base files - session-specific, does not affect default KB"""
     try:
         if db is None:
             raise HTTPException(status_code=503, detail="Database not initialized. Please wait for the service to start.")
         if not files or len(files) == 0:
             raise HTTPException(status_code=400, detail="No files provided")
         
+        if not session_id:
+            raise HTTPException(status_code=400, detail="session_id is required for uploads")
+        
         supported_extensions = {'.txt', '.md', '.markdown', '.pdf', '.zip'}
         
         kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
-        sessions_dir = kb_folder / "sessions"
-        
-        # Clear default KB files (but keep sessions folder structure)
-        if kb_folder.exists():
-            for item in kb_folder.iterdir():
-                if item.is_file() and item.suffix.lower() in supported_extensions:
-                    item.unlink()
-                elif item.is_dir() and item.name != "sessions":
-                    shutil.rmtree(item)
-        
-        # Upload to main KB folder (not sessions subfolder)
-        upload_dir = kb_folder
+        # Upload to session-specific folder
+        upload_dir = kb_folder / "sessions" / session_id
         upload_dir.mkdir(parents=True, exist_ok=True)
-        
-        if not session_id:
-            session_id = str(uuid.uuid4())
         
         user_id = user_id or "anonymous"
         all_documents = []
@@ -484,11 +474,14 @@ async def upload_knowledge_base(
                                 uploaded_files.append(str(rel_path))
                                 total_size += dest_path.stat().st_size
                     
-                    folder_docs = process_folder(upload_dir, str(upload_dir))
+                    folder_docs = process_folder(upload_dir, str(kb_folder))
+                    for doc in folder_docs:
+                        doc.metadata["session_id"] = session_id
+                        doc.metadata["is_session_upload"] = True
                     all_documents.extend(folder_docs)
             
             elif file_extension in supported_extensions:
-                # Use original filename instead of UUID
+                # Use original filename
                 saved_filename = file.filename
                 file_path = upload_dir / saved_filename
                 
@@ -507,7 +500,9 @@ async def upload_knowledge_base(
                 total_size += file_path.stat().st_size
                 
                 try:
-                    doc = process_uploaded_file(file_path, file.filename, str(upload_dir))
+                    doc = process_uploaded_file(file_path, file.filename, str(kb_folder))
+                    doc.metadata["session_id"] = session_id
+                    doc.metadata["is_session_upload"] = True
                     all_documents.append(doc)
                     uploaded_files.append(saved_filename)
                 except Exception:
@@ -521,34 +516,9 @@ async def upload_knowledge_base(
         if not all_documents:
             raise HTTPException(status_code=400, detail="No valid files were processed")
         
-        # Rebuild the index completely with new documents (replaces default KB)
+        # Add documents to existing index (session-specific, doesn't affect default KB)
         engine = get_rag_engine()
-        
-        # Clear existing index and rebuild from scratch
-        index_path = Path(engine.index_path)
-        if index_path.exists():
-            if index_path.is_dir():
-                shutil.rmtree(index_path)
-            else:
-                index_path.unlink()
-                # Also remove .pkl file if it exists
-                pkl_path = Path(str(index_path) + ".pkl")
-                if pkl_path.exists():
-                    pkl_path.unlink()
-        
-        # Rebuild index with all new documents
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=engine.chunk_size,
-            chunk_overlap=engine.chunk_overlap,
-            length_function=len
-        )
-        split_docs = text_splitter.split_documents(all_documents)
-        engine.vectorstore = FAISS.from_documents(split_docs, engine.embedding_model)
-        engine.vectorstore.save_local(engine.index_path)
-        
-        # Update the engine in the cache
-        engine_key = "local" if engine.use_local_llm else "openai"
-        rag_engines[engine_key] = engine
+        engine.add_documents_to_index(all_documents)
         
         kb_name = kb_name or f"{len(uploaded_files)} file(s)"
         kb_record = db.save_knowledge_base(
@@ -566,11 +536,10 @@ async def upload_knowledge_base(
         })
         
         return {
-            "message": f"Successfully uploaded {len(uploaded_files)} file(s). Default KB has been replaced.",
+            "message": f"Successfully uploaded {len(uploaded_files)} file(s) to your session",
             "session_id": session_id,
             "files_uploaded": uploaded_files,
             "file_count": len(uploaded_files),
-            "kb_replaced": True,
             "kb_record": {
                 "kb_name": kb_record["kb_name"],
                 "created_at": kb_record["created_at"].isoformat()
@@ -642,33 +611,61 @@ async def list_knowledge_bases(user_id: Optional[str] = None):
 
 
 @app.get("/knowledge-base/files")
-async def list_kb_files():
-    """List all files in the knowledge base directory"""
+async def list_kb_files(session_id: Optional[str] = None):
+    """List files in the knowledge base - shows default KB files and session-specific files if session_id provided"""
     try:
         kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
         supported_extensions = {'.txt', '.md', '.markdown', '.pdf'}
         files = []
         
         if not kb_folder.exists():
-            return {"files": [], "total": 0}
+            return {"files": [], "total": 0, "default_files": [], "session_files": []}
         
-        for root, dirs, filenames in os.walk(kb_folder):
-            for filename in filenames:
-                file_path = Path(root) / filename
-                if file_path.suffix.lower() in supported_extensions:
-                    rel_path = os.path.relpath(file_path, kb_folder)
-                    stat = file_path.stat()
-                    files.append({
-                        "filename": filename,
-                        "path": rel_path,
-                        "size": stat.st_size,
-                        "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
-                        "type": file_path.suffix.lower()
-                    })
+        default_files = []
+        session_files = []
+        
+        # List default KB files (not in sessions folder)
+        for item in kb_folder.iterdir():
+            if item.is_file() and item.suffix.lower() in supported_extensions:
+                rel_path = os.path.relpath(item, kb_folder)
+                stat = item.stat()
+                file_info = {
+                    "filename": item.name,
+                    "path": rel_path,
+                    "size": stat.st_size,
+                    "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                    "type": item.suffix.lower(),
+                    "is_session_file": False
+                }
+                default_files.append(file_info)
+                files.append(file_info)
+        
+        # List session-specific files if session_id provided
+        if session_id:
+            session_dir = kb_folder / "sessions" / session_id
+            if session_dir.exists():
+                for root, dirs, filenames in os.walk(session_dir):
+                    for filename in filenames:
+                        file_path = Path(root) / filename
+                        if file_path.suffix.lower() in supported_extensions:
+                            rel_path = os.path.relpath(file_path, kb_folder)
+                            stat = file_path.stat()
+                            file_info = {
+                                "filename": filename,
+                                "path": rel_path,
+                                "size": stat.st_size,
+                                "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                                "type": file_path.suffix.lower(),
+                                "is_session_file": True
+                            }
+                            session_files.append(file_info)
+                            files.append(file_info)
         
         return {
             "files": sorted(files, key=lambda x: x["modified"], reverse=True),
-            "total": len(files)
+            "total": len(files),
+            "default_files": sorted(default_files, key=lambda x: x["modified"], reverse=True),
+            "session_files": sorted(session_files, key=lambda x: x["modified"], reverse=True)
         }
     except Exception:
         raise HTTPException(status_code=500, detail="Error listing KB files")
@@ -711,8 +708,8 @@ async def get_kb_file_content(file_path: str):
 
 
 @app.delete("/knowledge-base/files/{file_path:path}")
-async def delete_kb_file(file_path: str):
-    """Delete a specific KB file and rebuild index"""
+async def delete_kb_file(file_path: str, session_id: Optional[str] = None):
+    """Delete a specific KB file - only allows deletion of session-specific files"""
     try:
         kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
         file_full_path = kb_folder / file_path
@@ -725,6 +722,17 @@ async def delete_kb_file(file_path: str):
         if not file_full_path.exists():
             raise HTTPException(status_code=404, detail="File not found")
         
+        # Only allow deletion of session-specific files (in sessions folder)
+        if not session_id:
+            raise HTTPException(status_code=400, detail="session_id is required to delete files")
+        
+        # Check if file is in the session's folder
+        session_dir = kb_folder / "sessions" / session_id
+        try:
+            file_full_path.resolve().relative_to(session_dir.resolve())
+        except ValueError:
+            raise HTTPException(status_code=403, detail="Can only delete files from your own session")
+        
         supported_extensions = {'.txt', '.md', '.markdown', '.pdf'}
         if file_full_path.suffix.lower() not in supported_extensions:
             raise HTTPException(status_code=400, detail="Unsupported file type")
@@ -732,41 +740,57 @@ async def delete_kb_file(file_path: str):
         # Delete the file
         file_full_path.unlink()
         
-        # Rebuild the index without this file
+        # Remove the file's chunks from the index
+        # We need to rebuild the index without this file's chunks
         engine = get_rag_engine()
         
-        # Clear existing index
-        index_path = Path(engine.index_path)
-        if index_path.exists():
-            if index_path.is_dir():
-                shutil.rmtree(index_path)
-            else:
-                index_path.unlink()
-                # Also remove .pkl file if it exists
-                pkl_path = Path(str(index_path) + ".pkl")
-                if pkl_path.exists():
-                    pkl_path.unlink()
-        
-        # Reload all documents from KB folder
+        # Get all documents from KB (default + all sessions)
         from backend.file_processor import extract_text_from_file
+        from langchain.docstore.document import Document
         documents = []
-        for root, _, files in os.walk(kb_folder):
-            for fname in files:
-                fpath = Path(root) / fname
-                if fpath.suffix.lower() in supported_extensions and fpath.exists():
-                    try:
-                        content = extract_text_from_file(fpath)
-                        if content and content.strip():
-                            rel_path = os.path.relpath(fpath, kb_folder)
-                            from langchain.docstore.document import Document
-                            documents.append(Document(
-                                page_content=content.strip(),
-                                metadata={"source": rel_path, "file_type": fpath.suffix.lower()}
-                            ))
-                    except Exception:
-                        continue
         
-        # Rebuild index
+        # Load default KB files
+        for item in kb_folder.iterdir():
+            if item.is_file() and item.suffix.lower() in supported_extensions:
+                try:
+                    content = extract_text_from_file(item)
+                    if content and content.strip():
+                        rel_path = os.path.relpath(item, kb_folder)
+                        documents.append(Document(
+                            page_content=content.strip(),
+                            metadata={"source": rel_path, "file_type": item.suffix.lower()}
+                        ))
+                except Exception:
+                    continue
+        
+        # Load all session files
+        sessions_dir = kb_folder / "sessions"
+        if sessions_dir.exists():
+            for session_folder in sessions_dir.iterdir():
+                if session_folder.is_dir():
+                    for root, _, files in os.walk(session_folder):
+                        for fname in files:
+                            fpath = Path(root) / fname
+                            if fpath.suffix.lower() in supported_extensions and fpath.exists():
+                                try:
+                                    content = extract_text_from_file(fpath)
+                                    if content and content.strip():
+                                        rel_path = os.path.relpath(fpath, kb_folder)
+                                        session_id_from_path = session_folder.name
+                                        doc = Document(
+                                            page_content=content.strip(),
+                                            metadata={
+                                                "source": rel_path,
+                                                "file_type": fpath.suffix.lower(),
+                                                "session_id": session_id_from_path,
+                                                "is_session_upload": True
+                                            }
+                                        )
+                                        documents.append(doc)
+                                except Exception:
+                                    continue
+        
+        # Rebuild index with remaining documents
         if documents:
             text_splitter = RecursiveCharacterTextSplitter(
                 chunk_size=engine.chunk_size,
@@ -777,7 +801,7 @@ async def delete_kb_file(file_path: str):
             engine.vectorstore = FAISS.from_documents(split_docs, engine.embedding_model)
             engine.vectorstore.save_local(engine.index_path)
         else:
-            # No documents left - vectorstore will be None and retrieve will return empty
+            # No documents left
             engine.vectorstore = None
         
         # Update the engine in the cache
