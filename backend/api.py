@@ -26,6 +26,8 @@ import zipfile
 import tempfile
 import asyncio
 from collections import Counter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import FAISS
 
 
 app = FastAPI(title="Advanced RAG Chatbot API", version="2.0.0")
@@ -421,7 +423,7 @@ async def upload_knowledge_base(
     user_id: Optional[str] = Form(None),
     kb_name: Optional[str] = Form(None)
 ):
-    """Upload knowledge base files"""
+    """Upload knowledge base files - replaces default KB completely"""
     try:
         if db is None:
             raise HTTPException(status_code=503, detail="Database not initialized. Please wait for the service to start.")
@@ -430,13 +432,23 @@ async def upload_knowledge_base(
         
         supported_extensions = {'.txt', '.md', '.markdown', '.pdf', '.zip'}
         
-        if session_id:
-            upload_dir = Path("KB") / "sessions" / session_id
-        else:
-            session_id = str(uuid.uuid4())
-            upload_dir = Path("KB") / "sessions" / session_id
+        kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
+        sessions_dir = kb_folder / "sessions"
         
+        # Clear default KB files (but keep sessions folder structure)
+        if kb_folder.exists():
+            for item in kb_folder.iterdir():
+                if item.is_file() and item.suffix.lower() in supported_extensions:
+                    item.unlink()
+                elif item.is_dir() and item.name != "sessions":
+                    shutil.rmtree(item)
+        
+        # Upload to main KB folder (not sessions subfolder)
+        upload_dir = kb_folder
         upload_dir.mkdir(parents=True, exist_ok=True)
+        
+        if not session_id:
+            session_id = str(uuid.uuid4())
         
         user_id = user_id or "anonymous"
         all_documents = []
@@ -473,15 +485,21 @@ async def upload_knowledge_base(
                                 total_size += dest_path.stat().st_size
                     
                     folder_docs = process_folder(upload_dir, str(upload_dir))
-                    for doc in folder_docs:
-                        doc.metadata["session_id"] = session_id
-                        doc.metadata["is_session_upload"] = True
                     all_documents.extend(folder_docs)
             
             elif file_extension in supported_extensions:
-                file_id = str(uuid.uuid4())
-                saved_filename = f"{file_id}{file_extension}"
+                # Use original filename instead of UUID
+                saved_filename = file.filename
                 file_path = upload_dir / saved_filename
+                
+                # Handle filename conflicts
+                counter = 1
+                while file_path.exists():
+                    name_part = Path(file.filename).stem
+                    ext_part = Path(file.filename).suffix
+                    saved_filename = f"{name_part}_{counter}{ext_part}"
+                    file_path = upload_dir / saved_filename
+                    counter += 1
                 
                 with open(file_path, "wb") as buffer:
                     shutil.copyfileobj(file.file, buffer)
@@ -490,10 +508,8 @@ async def upload_knowledge_base(
                 
                 try:
                     doc = process_uploaded_file(file_path, file.filename, str(upload_dir))
-                    doc.metadata["session_id"] = session_id
-                    doc.metadata["is_session_upload"] = True
                     all_documents.append(doc)
-                    uploaded_files.append(file.filename)
+                    uploaded_files.append(saved_filename)
                 except Exception:
                     continue
             else:
@@ -505,8 +521,34 @@ async def upload_knowledge_base(
         if not all_documents:
             raise HTTPException(status_code=400, detail="No valid files were processed")
         
-        for engine in rag_engines.values():
-            engine.add_documents_to_index(all_documents)
+        # Rebuild the index completely with new documents (replaces default KB)
+        engine = get_rag_engine()
+        
+        # Clear existing index and rebuild from scratch
+        index_path = Path(engine.index_path)
+        if index_path.exists():
+            if index_path.is_dir():
+                shutil.rmtree(index_path)
+            else:
+                index_path.unlink()
+                # Also remove .pkl file if it exists
+                pkl_path = Path(str(index_path) + ".pkl")
+                if pkl_path.exists():
+                    pkl_path.unlink()
+        
+        # Rebuild index with all new documents
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=engine.chunk_size,
+            chunk_overlap=engine.chunk_overlap,
+            length_function=len
+        )
+        split_docs = text_splitter.split_documents(all_documents)
+        engine.vectorstore = FAISS.from_documents(split_docs, engine.embedding_model)
+        engine.vectorstore.save_local(engine.index_path)
+        
+        # Update the engine in the cache
+        engine_key = "local" if engine.use_local_llm else "openai"
+        rag_engines[engine_key] = engine
         
         kb_name = kb_name or f"{len(uploaded_files)} file(s)"
         kb_record = db.save_knowledge_base(
@@ -524,10 +566,11 @@ async def upload_knowledge_base(
         })
         
         return {
-            "message": f"Successfully uploaded {len(uploaded_files)} file(s) to your session",
+            "message": f"Successfully uploaded {len(uploaded_files)} file(s). Default KB has been replaced.",
             "session_id": session_id,
             "files_uploaded": uploaded_files,
             "file_count": len(uploaded_files),
+            "kb_replaced": True,
             "kb_record": {
                 "kb_name": kb_record["kb_name"],
                 "created_at": kb_record["created_at"].isoformat()
@@ -665,6 +708,90 @@ async def get_kb_file_content(file_path: str):
         raise
     except Exception:
         raise HTTPException(status_code=500, detail="Error reading file")
+
+
+@app.delete("/knowledge-base/files/{file_path:path}")
+async def delete_kb_file(file_path: str):
+    """Delete a specific KB file and rebuild index"""
+    try:
+        kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
+        file_full_path = kb_folder / file_path
+        
+        try:
+            file_full_path.resolve().relative_to(kb_folder.resolve())
+        except ValueError:
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        if not file_full_path.exists():
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        supported_extensions = {'.txt', '.md', '.markdown', '.pdf'}
+        if file_full_path.suffix.lower() not in supported_extensions:
+            raise HTTPException(status_code=400, detail="Unsupported file type")
+        
+        # Delete the file
+        file_full_path.unlink()
+        
+        # Rebuild the index without this file
+        engine = get_rag_engine()
+        
+        # Clear existing index
+        index_path = Path(engine.index_path)
+        if index_path.exists():
+            if index_path.is_dir():
+                shutil.rmtree(index_path)
+            else:
+                index_path.unlink()
+                # Also remove .pkl file if it exists
+                pkl_path = Path(str(index_path) + ".pkl")
+                if pkl_path.exists():
+                    pkl_path.unlink()
+        
+        # Reload all documents from KB folder
+        from backend.file_processor import extract_text_from_file
+        documents = []
+        for root, _, files in os.walk(kb_folder):
+            for fname in files:
+                fpath = Path(root) / fname
+                if fpath.suffix.lower() in supported_extensions and fpath.exists():
+                    try:
+                        content = extract_text_from_file(fpath)
+                        if content and content.strip():
+                            rel_path = os.path.relpath(fpath, kb_folder)
+                            from langchain.docstore.document import Document
+                            documents.append(Document(
+                                page_content=content.strip(),
+                                metadata={"source": rel_path, "file_type": fpath.suffix.lower()}
+                            ))
+                    except Exception:
+                        continue
+        
+        # Rebuild index
+        if documents:
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=engine.chunk_size,
+                chunk_overlap=engine.chunk_overlap,
+                length_function=len
+            )
+            split_docs = text_splitter.split_documents(documents)
+            engine.vectorstore = FAISS.from_documents(split_docs, engine.embedding_model)
+            engine.vectorstore.save_local(engine.index_path)
+        else:
+            # No documents left - vectorstore will be None and retrieve will return empty
+            engine.vectorstore = None
+        
+        # Update the engine in the cache
+        engine_key = "local" if engine.use_local_llm else "openai"
+        rag_engines[engine_key] = engine
+        
+        return {
+            "message": f"File {file_path} deleted successfully",
+            "file_path": file_path
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting file: {str(e)}")
 
 
 if __name__ == "__main__":

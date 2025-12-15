@@ -29,11 +29,13 @@ function App() {
   const [kbFiles, setKbFiles] = useState([])
   const [selectedFile, setSelectedFile] = useState(null)
   const [fileContent, setFileContent] = useState(null)
+  const [hasUploadedKB, setHasUploadedKB] = useState(false)
   const messagesEndRef = useRef(null)
 
   useEffect(() => {
     createSession()
     loadAnalytics()
+    loadKBFiles()
   }, [])
 
   useEffect(() => {
@@ -95,6 +97,32 @@ function App() {
     } catch (error) {
       console.error('Error loading file content:', error)
       alert('Error loading file content')
+    }
+  }
+
+  const deleteFile = async (filePath) => {
+    if (!confirm(`Are you sure you want to delete ${filePath}?`)) {
+      return
+    }
+    
+    try {
+      const response = await fetch(`${API_URL}/knowledge-base/files/${encodeURIComponent(filePath)}`, {
+        method: 'DELETE'
+      })
+      if (response.ok) {
+        alert('File deleted successfully')
+        await loadKBFiles()
+        if (selectedFile === filePath) {
+          setFileContent(null)
+          setSelectedFile(null)
+        }
+      } else {
+        const error = await response.json()
+        alert(`Error: ${error.detail || 'Failed to delete file'}`)
+      }
+    } catch (error) {
+      console.error('Delete error:', error)
+      alert('Error deleting file. Please try again.')
     }
   }
 
@@ -198,9 +226,11 @@ function App() {
 
       if (response.ok) {
         const data = await response.json()
-        alert(`Successfully uploaded ${data.file_count} file(s) to your session`)
+        alert(`Successfully uploaded ${data.file_count} file(s). Default KB has been replaced.`)
         setShowUpload(false)
+        setHasUploadedKB(true)
         loadAnalytics()
+        loadKBFiles()
       } else {
         const error = await response.json()
         alert(`Error: ${error.detail || 'Failed to upload files'}`)
@@ -224,7 +254,18 @@ function App() {
       <div className="chat-container">
         <div className="chat-header">
           <div className="header-content">
-            <h1>Knowledge Base Assistant</h1>
+            <h1 
+              style={{ cursor: 'pointer' }}
+              onClick={() => {
+                setShowUpload(false)
+                setShowViewKB(false)
+                setShowAnalytics(false)
+                setFileContent(null)
+                setSelectedFile(null)
+              }}
+            >
+              Knowledge Base Assistant
+            </h1>
           </div>
           <div className="header-actions">
             <button 
@@ -253,25 +294,47 @@ function App() {
 
         {(showUpload || showViewKB) && (
           <div className="upload-panel">
-            <div className="kb-panel-tabs">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div className="kb-panel-tabs" style={{ flex: 1 }}>
+                <button 
+                  className={showViewKB ? '' : 'active'}
+                  onClick={() => {
+                    setShowViewKB(false)
+                    setShowUpload(true)
+                  }}
+                >
+                  Upload
+                </button>
+                <button 
+                  className={showViewKB ? 'active' : ''}
+                  onClick={async () => {
+                    setShowUpload(false)
+                    setShowViewKB(true)
+                    await loadKBFiles()
+                  }}
+                >
+                  View Files
+                </button>
+              </div>
               <button 
-                className={showViewKB ? '' : 'active'}
                 onClick={() => {
-                  setShowViewKB(false)
-                  setShowUpload(true)
-                }}
-              >
-                Upload
-              </button>
-              <button 
-                className={showViewKB ? 'active' : ''}
-                onClick={async () => {
                   setShowUpload(false)
-                  setShowViewKB(true)
-                  await loadKBFiles()
+                  setShowViewKB(false)
+                  setFileContent(null)
+                  setSelectedFile(null)
                 }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  color: '#666',
+                  padding: '4px 8px',
+                  marginLeft: '16px'
+                }}
+                title="Close"
               >
-                View Files
+                ×
               </button>
             </div>
 
@@ -289,7 +352,6 @@ function App() {
                     }
                   }}
                 />
-                <p className="upload-hint">You can select multiple files or upload a zip file containing a folder structure</p>
               </div>
             )}
 
@@ -307,12 +369,35 @@ function App() {
                           <li 
                             key={idx}
                             className={selectedFile === file.path ? 'selected' : ''}
-                            onClick={() => loadFileContent(file.path)}
                           >
-                            <span className="file-name">{file.filename}</span>
-                            <span className="file-info">
-                              {file.type} • {formatFileSize(file.size)}
-                            </span>
+                            <div 
+                              style={{ flex: 1, cursor: 'pointer' }}
+                              onClick={() => loadFileContent(file.path)}
+                            >
+                              <span className="file-name">{file.filename}</span>
+                              <span className="file-info">
+                                {file.type} • {formatFileSize(file.size)}
+                              </span>
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                deleteFile(file.path)
+                              }}
+                              style={{
+                                background: '#ff4444',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                padding: '4px 8px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                marginLeft: '8px'
+                              }}
+                              title="Delete file"
+                            >
+                              Delete
+                            </button>
                           </li>
                         ))}
                       </ul>
@@ -335,19 +420,28 @@ function App() {
                 )}
               </div>
             )}
-
-            <button onClick={() => {
-              setShowUpload(false)
-              setShowViewKB(false)
-              setFileContent(null)
-              setSelectedFile(null)
-            }}>Close</button>
           </div>
         )}
 
         {showAnalytics && analytics && (
           <div className="analytics-panel">
-            <h3>Analytics</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0 }}>Analytics</h3>
+              <button 
+                onClick={() => setShowAnalytics(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  color: '#666',
+                  padding: '4px 8px'
+                }}
+                title="Close"
+              >
+                ×
+              </button>
+            </div>
             <div className="analytics-grid">
               <div className="stat-card">
                 <h4>Total Sessions</h4>
@@ -377,12 +471,11 @@ function App() {
                 ))}
               </ul>
             </div>
-            <button onClick={() => setShowAnalytics(false)}>Close</button>
           </div>
         )}
         
         <div className="messages-container">
-          {messages.length === 1 && (
+          {messages.length === 1 && !hasUploadedKB && (
             <div className="sample-queries">
               <h3>Try asking:</h3>
               <div className="sample-queries-grid">
