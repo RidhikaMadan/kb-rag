@@ -5,7 +5,7 @@ A Retrieval-Augmented Generation (RAG) system designed to answer questions from 
 ## Features
 
 ### Core Features
-- **OpenAI & Llama Integration**: Uses OpenAI with Local Llama support for privacy-conscious users (see Local Llama Setup)
+- **OpenAI & Llama Integration**: Uses OpenAI with Local Llama support for privacy-conscious users
 - **Multi-Turn Reasoning**: Context-aware conversations with chat history
 - **Session Tracking**: MongoDB-based session management and analytics
 - **Knowledge Base Management**: Upload, view, and browse KB files (supports .txt, .md, .pdf)
