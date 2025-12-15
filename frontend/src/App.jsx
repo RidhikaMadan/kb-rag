@@ -74,10 +74,7 @@ function App() {
 
   const loadKBFiles = async () => {
     try {
-      const url = sessionId 
-        ? `${API_URL}/knowledge-base/files?session_id=${encodeURIComponent(sessionId)}`
-        : `${API_URL}/knowledge-base/files`
-      const response = await fetch(url)
+      const response = await fetch(`${API_URL}/knowledge-base/files`)
       if (response.ok) {
         const data = await response.json()
         setKbFiles(data.files || [])
@@ -104,17 +101,12 @@ function App() {
   }
 
   const deleteFile = async (filePath) => {
-    if (!sessionId) {
-      alert('Session ID is required to delete files')
-      return
-    }
-    
     if (!confirm(`Are you sure you want to delete ${filePath}?`)) {
       return
     }
     
     try {
-      const url = `${API_URL}/knowledge-base/files/${encodeURIComponent(filePath)}?session_id=${encodeURIComponent(sessionId)}`
+      const url = `${API_URL}/knowledge-base/files/${encodeURIComponent(filePath)}`
       const response = await fetch(url, {
         method: 'DELETE'
       })
@@ -423,46 +415,43 @@ function App() {
                             key={idx}
                             className={selectedFile === file.path ? 'selected' : ''}
                           >
-                            <div 
-                              style={{ flex: 1, cursor: 'pointer' }}
-                              onClick={() => loadFileContent(file.path)}
-                            >
-                              <span className="file-name">{file.filename}</span>
-                              <span className="file-info">
-                                {file.type} • {formatFileSize(file.size)}
-                                {file.is_session_file && ' • (Your file)'}
-                              </span>
-                            </div>
-                            {file.is_session_file && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  deleteFile(file.path)
-                                }}
-                                style={{
-                                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                  color: 'white',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  padding: '4px 8px',
-                                  cursor: 'pointer',
-                                  fontSize: '12px',
-                                  marginLeft: '8px',
-                                  transition: 'all 0.2s'
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.target.style.opacity = '0.9'
-                                  e.target.style.transform = 'translateY(-1px)'
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.target.style.opacity = '1'
-                                  e.target.style.transform = 'translateY(0)'
-                                }}
-                                title="Delete file"
-                              >
-                                Delete
-                              </button>
-                            )}
+                          <div 
+                            style={{ flex: 1, cursor: 'pointer' }}
+                            onClick={() => loadFileContent(file.path)}
+                          >
+                            <span className="file-name">{file.filename}</span>
+                            <span className="file-info">
+                              {file.type} • {formatFileSize(file.size)}
+                            </span>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              deleteFile(file.path)
+                            }}
+                            style={{
+                              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '4px',
+                              padding: '4px 8px',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              marginLeft: '8px',
+                              transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.target.style.opacity = '0.9'
+                              e.target.style.transform = 'translateY(-1px)'
+                            }}
+                            onMouseLeave={(e) => {
+                              e.target.style.opacity = '1'
+                              e.target.style.transform = 'translateY(0)'
+                            }}
+                            title="Delete file"
+                          >
+                            Delete
+                          </button>
                           </li>
                         ))}
                       </ul>
