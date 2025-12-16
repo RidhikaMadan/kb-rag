@@ -44,8 +44,9 @@ app.add_middleware(
 # Initialize database (will be set during startup)
 db: Optional[Database] = None
 
-# Initialize RAG engines (one per model type)
+# Initialize RAG engines (one per model type for base, plus one per session)
 rag_engines: Dict[str, RAGEngine] = {}
+session_rag_engines: Dict[str, RAGEngine] = {}
 
 
 @app.on_event("startup")
@@ -117,11 +118,13 @@ async def startup_event():
     print("="*60 + "\n")
 
 
-def get_rag_engine() -> RAGEngine:
-    """Get or create RAG engine - auto-detects local model if available"""
+def get_rag_engine(session_id: Optional[str] = None) -> RAGEngine:
+    """Get or create RAG engine - auto-detects local model if available
+    If session_id is provided, returns a session-specific engine with its own KB folder
+    """
     use_local_env = os.getenv("USE_LOCAL_LLM", "false").lower() == "true"
     openai_api_key = os.getenv("OPENAI_API_KEY")
-    kb_folder = os.getenv("KB_FOLDER", "KB")
+    base_kb_folder = os.getenv("KB_FOLDER", "KB")
     
     model_path = "models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
     local_model_exists = os.path.exists(model_path)
@@ -141,6 +144,39 @@ def get_rag_engine() -> RAGEngine:
     else:
         use_local = False
     
+    # If session_id is provided, use session-specific KB folder and index
+    if session_id:
+        session_kb_folder = Path(base_kb_folder) / "sessions" / session_id
+        session_index_path = f"index.faiss/sessions/{session_id}"
+        
+        # Create session KB folder if it doesn't exist (starts empty - no default files)
+        session_kb_folder.mkdir(parents=True, exist_ok=True)
+        
+        # Create index directory if it doesn't exist
+        index_dir = Path(session_index_path).parent
+        index_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Check if we already have a RAG engine for this session
+        if session_id in session_rag_engines:
+            return session_rag_engines[session_id]
+        
+        # Create new session-specific RAG engine
+        if use_local and not local_model_exists:
+            raise ValueError(
+                f"Local model file not found at {model_path}. "
+                "Please download the model or set USE_LOCAL_LLM=false to use OpenAI."
+            )
+        
+        session_engine = RAGEngine(
+            kb_folder=str(session_kb_folder),
+            index_path=session_index_path,
+            use_local_llm=use_local,
+            openai_api_key=openai_api_key if not use_local else None
+        )
+        session_rag_engines[session_id] = session_engine
+        return session_engine
+    
+    # No session_id - use base/global KB folder
     engine_key = "local" if use_local else "openai"
     
     if engine_key not in rag_engines:
@@ -151,7 +187,7 @@ def get_rag_engine() -> RAGEngine:
             )
         
         rag_engines[engine_key] = RAGEngine(
-            kb_folder=kb_folder,
+            kb_folder=base_kb_folder,
             use_local_llm=use_local,
             openai_api_key=openai_api_key if not use_local else None
         )
@@ -282,8 +318,8 @@ async def chat(request: ChatMessage):
                 content = content.encode('utf-8', errors='replace').decode('utf-8')
             chat_history.append({"role": role, "content": content})
         
-        # Get RAG engine
-        engine = get_rag_engine()
+        # Get RAG engine (session-specific)
+        engine = get_rag_engine(session_id=session_id)
         use_local = os.getenv("USE_LOCAL_LLM", "false").lower() == "true"
         
         # Get intent classification
@@ -423,23 +459,28 @@ async def upload_knowledge_base(
     user_id: Optional[str] = Form(None),
     kb_name: Optional[str] = Form(None)
 ):
-    """Upload knowledge base files - replaces the entire KB"""
+    """Upload knowledge base files - session-specific, replaces the session's KB"""
     try:
         if db is None:
             raise HTTPException(status_code=503, detail="Database not initialized. Please wait for the service to start.")
         if not files or len(files) == 0:
             raise HTTPException(status_code=400, detail="No files provided")
+        if not session_id:
+            raise HTTPException(status_code=400, detail="session_id is required for upload")
         
         supported_extensions = {'.txt', '.md', '.markdown', '.pdf', '.zip'}
         
-        kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
-        # Clear existing KB folder entirely (including sessions) to replace KB
-        if kb_folder.exists():
-            shutil.rmtree(kb_folder)
-        kb_folder.mkdir(parents=True, exist_ok=True)
+        base_kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
+        # Use session-specific KB folder
+        session_kb_folder = base_kb_folder / "sessions" / session_id
         
-        # Upload to main KB folder
-        upload_dir = kb_folder
+        # Clear existing session KB folder to replace KB
+        if session_kb_folder.exists():
+            shutil.rmtree(session_kb_folder)
+        session_kb_folder.mkdir(parents=True, exist_ok=True)
+        
+        # Upload to session-specific KB folder
+        upload_dir = session_kb_folder
         
         user_id = user_id or "anonymous"
         all_documents = []
@@ -512,8 +553,8 @@ async def upload_knowledge_base(
         if not all_documents:
             raise HTTPException(status_code=400, detail="No valid files were processed")
         
-        # Rebuild index from scratch with new documents (KB fully replaced)
-        engine = get_rag_engine()
+        # Rebuild index from scratch with new documents (session-specific KB fully replaced)
+        engine = get_rag_engine(session_id=session_id)
         
         index_path = Path(engine.index_path)
         if index_path.exists():
@@ -534,23 +575,27 @@ async def upload_knowledge_base(
         engine.vectorstore = FAISS.from_documents(split_docs, engine.embedding_model)
         engine.vectorstore.save_local(engine.index_path)
         
+        # Update session engine cache
+        session_rag_engines[session_id] = engine
+        
         kb_name = kb_name or f"{len(uploaded_files)} file(s)"
         kb_record = db.save_knowledge_base(
             user_id, 
             kb_name, 
             str(upload_dir),
-            metadata={"files": uploaded_files, "file_count": len(uploaded_files)}
+            metadata={"files": uploaded_files, "file_count": len(uploaded_files), "session_id": session_id}
         )
         
         db.log_analytics("kb_upload", {
             "user_id": user_id,
+            "session_id": session_id,
             "file_count": len(uploaded_files),
             "file_size": total_size,
             "files": uploaded_files
         })
         
         return {
-            "message": f"Successfully uploaded {len(uploaded_files)} file(s). The knowledge base has been replaced.",
+            "message": f"Successfully uploaded {len(uploaded_files)} file(s) to your session.",
             "session_id": session_id,
             "files_uploaded": uploaded_files,
             "file_count": len(uploaded_files),
@@ -625,17 +670,27 @@ async def list_knowledge_bases(user_id: Optional[str] = None):
 
 
 @app.get("/knowledge-base/files")
-async def list_kb_files():
-    """List all files in the knowledge base (KB is global)"""
+async def list_kb_files(session_id: Optional[str] = None):
+    """List all files in the knowledge base (session-specific if session_id provided)"""
     try:
-        kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
+        base_kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
+        
+        # If session_id provided, use session-specific folder
+        if session_id:
+            kb_folder = base_kb_folder / "sessions" / session_id
+        else:
+            kb_folder = base_kb_folder
+        
         supported_extensions = {'.txt', '.md', '.markdown', '.pdf'}
         files = []
         
         if not kb_folder.exists():
-            return {"files": [], "total": 0}
+            return {"files": [], "total": 0, "session_id": session_id}
         
         for root, dirs, filenames in os.walk(kb_folder):
+            # Skip sessions subfolder when listing base KB
+            if not session_id and "sessions" in dirs:
+                dirs.remove("sessions")
             for filename in filenames:
                 file_path = Path(root) / filename
                 if file_path.suffix.lower() in supported_extensions:
@@ -651,17 +706,25 @@ async def list_kb_files():
         
         return {
             "files": sorted(files, key=lambda x: x["modified"], reverse=True),
-            "total": len(files)
+            "total": len(files),
+            "session_id": session_id
         }
     except Exception:
         raise HTTPException(status_code=500, detail="Error listing KB files")
 
 
 @app.get("/knowledge-base/files/{file_path:path}")
-async def get_kb_file_content(file_path: str):
-    """Get the content of a specific KB file"""
+async def get_kb_file_content(file_path: str, session_id: Optional[str] = None):
+    """Get the content of a specific KB file (session-specific if session_id provided)"""
     try:
-        kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
+        base_kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
+        
+        # If session_id provided, use session-specific folder
+        if session_id:
+            kb_folder = base_kb_folder / "sessions" / session_id
+        else:
+            kb_folder = base_kb_folder
+            
         file_full_path = kb_folder / file_path
         
         try:
@@ -694,10 +757,14 @@ async def get_kb_file_content(file_path: str):
 
 
 @app.delete("/knowledge-base/files/{file_path:path}")
-async def delete_kb_file(file_path: str):
-    """Delete a KB file (global KB) and rebuild index"""
+async def delete_kb_file(file_path: str, session_id: Optional[str] = None):
+    """Delete a KB file (session-specific if session_id provided) and rebuild index"""
     try:
-        kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
+        if not session_id:
+            raise HTTPException(status_code=400, detail="session_id is required for delete")
+            
+        base_kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
+        kb_folder = base_kb_folder / "sessions" / session_id
         file_full_path = kb_folder / file_path
         
         try:
@@ -715,8 +782,8 @@ async def delete_kb_file(file_path: str):
         # Delete the file
         file_full_path.unlink()
         
-        # Rebuild index from remaining documents
-        engine = get_rag_engine()
+        # Rebuild index from remaining documents (session-specific)
+        engine = get_rag_engine(session_id=session_id)
         
         from backend.file_processor import extract_text_from_file
         from langchain.docstore.document import Document
@@ -749,12 +816,13 @@ async def delete_kb_file(file_path: str):
         else:
             engine.vectorstore = None
         
-        engine_key = "local" if engine.use_local_llm else "openai"
-        rag_engines[engine_key] = engine
+        # Update session engine cache
+        session_rag_engines[session_id] = engine
         
         return {
-            "message": f"File {file_path} deleted successfully",
-            "file_path": file_path
+            "message": f"File {file_path} deleted successfully from your session",
+            "file_path": file_path,
+            "session_id": session_id
         }
     except HTTPException:
         raise

@@ -73,8 +73,9 @@ function App() {
   }
 
   const loadKBFiles = async () => {
+    if (!sessionId) return
     try {
-      const response = await fetch(`${API_URL}/knowledge-base/files`)
+      const response = await fetch(`${API_URL}/knowledge-base/files?session_id=${encodeURIComponent(sessionId)}`)
       if (response.ok) {
         const data = await response.json()
         setKbFiles(data.files || [])
@@ -85,8 +86,9 @@ function App() {
   }
 
   const loadFileContent = async (filePath) => {
+    if (!sessionId) return
     try {
-      const response = await fetch(`${API_URL}/knowledge-base/files/${encodeURIComponent(filePath)}`)
+      const response = await fetch(`${API_URL}/knowledge-base/files/${encodeURIComponent(filePath)}?session_id=${encodeURIComponent(sessionId)}`)
       if (response.ok) {
         const data = await response.json()
         setFileContent(data)
@@ -101,12 +103,16 @@ function App() {
   }
 
   const deleteFile = async (filePath) => {
+    if (!sessionId) {
+      alert('Session ID is required')
+      return
+    }
     if (!confirm(`Are you sure you want to delete ${filePath}?`)) {
       return
     }
     
     try {
-      const url = `${API_URL}/knowledge-base/files/${encodeURIComponent(filePath)}`
+      const url = `${API_URL}/knowledge-base/files/${encodeURIComponent(filePath)}?session_id=${encodeURIComponent(sessionId)}`
       const response = await fetch(url, {
         method: 'DELETE'
       })
