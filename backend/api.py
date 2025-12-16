@@ -149,8 +149,18 @@ def get_rag_engine(session_id: Optional[str] = None) -> RAGEngine:
         session_kb_folder = Path(base_kb_folder) / "sessions" / session_id
         session_index_path = f"index.faiss/sessions/{session_id}"
         
-        # Create session KB folder if it doesn't exist (starts empty - no default files)
+        # Create session KB folder if it doesn't exist
         session_kb_folder.mkdir(parents=True, exist_ok=True)
+        
+        # Initialize with default KB files if session folder is empty (new session)
+        if not any(session_kb_folder.iterdir()):
+            base_kb_path = Path(base_kb_folder)
+            if base_kb_path.exists():
+                # Copy default KB files to session folder (excluding sessions subfolder)
+                supported_extensions = {'.txt', '.md', '.markdown', '.pdf'}
+                for item in base_kb_path.iterdir():
+                    if item.is_file() and item.suffix.lower() in supported_extensions:
+                        shutil.copy2(item, session_kb_folder / item.name)
         
         # Create index directory if it doesn't exist
         index_dir = Path(session_index_path).parent
