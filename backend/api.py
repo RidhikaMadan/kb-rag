@@ -688,6 +688,15 @@ async def list_kb_files(session_id: Optional[str] = None):
         # If session_id provided, use session-specific folder
         if session_id:
             kb_folder = base_kb_folder / "sessions" / session_id
+            kb_folder.mkdir(parents=True, exist_ok=True)
+            
+            # Auto-seed session folder with default KB files if empty
+            if not any(kb_folder.iterdir()):
+                supported_extensions = {'.txt', '.md', '.markdown', '.pdf'}
+                if base_kb_folder.exists():
+                    for item in base_kb_folder.iterdir():
+                        if item.is_file() and item.suffix.lower() in supported_extensions:
+                            shutil.copy2(item, kb_folder / item.name)
         else:
             kb_folder = base_kb_folder
         
@@ -732,6 +741,15 @@ async def get_kb_file_content(file_path: str, session_id: Optional[str] = None):
         # If session_id provided, use session-specific folder
         if session_id:
             kb_folder = base_kb_folder / "sessions" / session_id
+            kb_folder.mkdir(parents=True, exist_ok=True)
+            
+            # Auto-seed session folder with default KB files if empty
+            if not any(kb_folder.iterdir()):
+                supported_extensions = {'.txt', '.md', '.markdown', '.pdf'}
+                if base_kb_folder.exists():
+                    for item in base_kb_folder.iterdir():
+                        if item.is_file() and item.suffix.lower() in supported_extensions:
+                            shutil.copy2(item, kb_folder / item.name)
         else:
             kb_folder = base_kb_folder
             
@@ -775,6 +793,16 @@ async def delete_kb_file(file_path: str, session_id: Optional[str] = None):
             
         base_kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
         kb_folder = base_kb_folder / "sessions" / session_id
+        kb_folder.mkdir(parents=True, exist_ok=True)
+        
+        # Auto-seed session folder with default KB files if empty
+        if not any(kb_folder.iterdir()):
+            supported_extensions = {'.txt', '.md', '.markdown', '.pdf'}
+            if base_kb_folder.exists():
+                for item in base_kb_folder.iterdir():
+                    if item.is_file() and item.suffix.lower() in supported_extensions:
+                        shutil.copy2(item, kb_folder / item.name)
+        
         file_full_path = kb_folder / file_path
         
         try:
