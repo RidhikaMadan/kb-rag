@@ -6,7 +6,7 @@ import './App.css'
 const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:8000')
 
 const SAMPLE_QUERIES = [
-  "Summarize the vacation policy and highlight any exceptions.",
+  "Summarize the vacation policy and highlight any blackout periods or exceptions.",
   "What steps should I follow to install and connect to the VPN on macOS?",
   "I'm locked out of my account after multiple failed attempts — what steps should I take to regain access?"
 ]
@@ -287,7 +287,7 @@ function App() {
               View or Upload Files
             </button>
 
-            # optional basic stats & analytics tab
+            {/* # optional basic stats & analytics tab */}
             {/* <button 
               className="analytics-button"
               onClick={() => {
