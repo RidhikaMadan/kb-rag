@@ -6,9 +6,9 @@ import './App.css'
 const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:8000')
 
 const SAMPLE_QUERIES = [
-  "How do I reset my password?",
-  "What is the vacation policy?",
-  "How do I set up VPN?"
+  "Summarize the vacation policy and highlight any exceptions.",
+  "What steps should I follow to install and connect to the VPN on macOS?",
+  "I'm locked out of my account after multiple failed attempts — what steps should I take to regain access?"
 ]
 
 function App() {
@@ -284,9 +284,11 @@ function App() {
                 setShowUpload(!showUpload)
               }}
             >
-              View or Upload KB
+              View or Upload Files
             </button>
-            <button 
+
+            # optional basic stats & analytics tab
+            {/* <button 
               className="analytics-button"
               onClick={() => {
                 setShowAnalytics(!showAnalytics)
@@ -294,7 +296,7 @@ function App() {
               }}
             >
                Analytics
-            </button>
+            </button> */}
             <button className="clear-button" onClick={handleClearChat}>
               Clear Chat
             </button>
