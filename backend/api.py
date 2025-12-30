@@ -1,6 +1,3 @@
-"""
-FastAPI application for RAG Chatbot
-"""
 import sys
 import io
 
@@ -87,27 +84,20 @@ async def startup_event():
                 # Don't raise - allow service to start without DB for health checks
                 db = None
     
-    # Pre-initialize RAG engine (lazy load for faster startup in Cloud Run)
-    print("\n[2/3] Checking RAG engine configuration...")
+    # Pre-initialize base RAG engine to avoid slow first request
+    print("\n[2/3] Initializing RAG engine...")
     try:
-        # Just verify configuration, don't fully initialize (lazy load)
-        openai_api_key = os.getenv("OPENAI_API_KEY")
-        kb_folder = os.getenv("KB_FOLDER", "KB")
-        
-        if not openai_api_key:
-            print("⚠ Warning: OPENAI_API_KEY not set. RAG will not work until configured.")
-        else:
-            print("✓ OpenAI API key configured.")
-        
-        if not os.path.exists(kb_folder) or not os.listdir(kb_folder):
-            print(f"⚠ Warning: KB folder '{kb_folder}' is empty or missing.")
-        else:
-            print(f"✓ KB folder found with {len(os.listdir(kb_folder))} files.")
-        
-        print("  RAG engine will be initialized on first request (lazy loading).")
+        # Pre-initialize the base RAG engine (without session_id)
+        # This loads all models upfront so first request is fast
+        print("  Loading models (this may take 30-60 seconds for local LLM)...")
+        base_engine = get_rag_engine(session_id=None)
+        print("✓ RAG engine initialized successfully.")
+        print("  Models loaded: embedding, reranker, intent classifier, and LLM provider.")
     except Exception as e:
-        print(f"⚠ Warning: Could not verify RAG configuration: {e}")
-        print("  RAG engine will be initialized on first request.")
+        error_msg = str(e)
+        print(f"⚠ Warning: Could not initialize RAG engine: {error_msg}")
+        print("  RAG engine will be initialized on first request (may be slow).")
+        # Don't fail startup - allow service to start and initialize on first request
     
     print("\n[3/3] Startup complete!")
     print("="*60)
