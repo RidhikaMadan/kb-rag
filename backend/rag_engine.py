@@ -85,7 +85,11 @@ class RAGEngine:
         reranker_model_name="cross-encoder/ms-marco-MiniLM-L-6-v2",
         casual_threshold=0.6,
         use_local_llm: bool = False,
-        openai_api_key: Optional[str] = None
+        openai_api_key: Optional[str] = None,
+        shared_llm_provider: Optional[LLMProvider] = None,
+        shared_embedding_model: Optional[Any] = None,
+        shared_reranker: Optional[Any] = None,
+        shared_intent_classifier: Optional[ZeroShotIntentClassifier] = None
     ):
         self.kb_folder = kb_folder
         self.index_path = index_path
@@ -94,18 +98,33 @@ class RAGEngine:
         self.chunk_overlap = chunk_overlap
         self.casual_threshold = casual_threshold
         
-        print("  Loading LLM provider...")
-        self.llm_provider: LLMProvider = get_llm_provider(use_local=use_local_llm, api_key=openai_api_key)
-        self.use_local_llm = use_local_llm
+        # Reuse shared models if provided, otherwise load new ones
+        if shared_llm_provider is not None:
+            self.llm_provider = shared_llm_provider
+            # use_local_llm should match the shared provider's type
+            self.use_local_llm = use_local_llm
+        else:
+            print("  Loading LLM provider...")
+            self.llm_provider: LLMProvider = get_llm_provider(use_local=use_local_llm, api_key=openai_api_key)
+            self.use_local_llm = use_local_llm
         
-        print("  Loading embedding model...")
-        self.embedding_model = HuggingFaceEmbeddings(model_name=embedding_model_name)
+        if shared_embedding_model is not None:
+            self.embedding_model = shared_embedding_model
+        else:
+            print("  Loading embedding model...")
+            self.embedding_model = HuggingFaceEmbeddings(model_name=embedding_model_name)
         
-        print("  Loading reranker model...")
-        self.reranker = CrossEncoder(reranker_model_name)
+        if shared_reranker is not None:
+            self.reranker = shared_reranker
+        else:
+            print("  Loading reranker model...")
+            self.reranker = CrossEncoder(reranker_model_name)
         
-        print("  Loading intent classifier...")
-        self.intent_classifier = ZeroShotIntentClassifier()
+        if shared_intent_classifier is not None:
+            self.intent_classifier = shared_intent_classifier
+        else:
+            print("  Loading intent classifier...")
+            self.intent_classifier = ZeroShotIntentClassifier()
         
         self.vectorstore = None
         print("  Loading or creating vector index...")
