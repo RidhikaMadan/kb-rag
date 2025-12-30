@@ -296,6 +296,304 @@ async def create_session():
     except Exception:
         raise HTTPException(status_code=500, detail="Error creating session")
 
+@app.get("/knowledge-base/files")
+async def list_kb_files(session_id: Optional[str] = None):
+    try:
+        base_kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
+        if session_id:
+            kb_folder = base_kb_folder / "sessions" / session_id
+            kb_folder.mkdir(parents=True, exist_ok=True)
+            if not any(kb_folder.iterdir()):
+                supported_extensions = {'.txt', '.md', '.markdown', '.pdf'}
+                if base_kb_folder.exists():
+                    for item in base_kb_folder.iterdir():
+                        if item.is_file() and item.suffix.lower() in supported_extensions:
+                            shutil.copy2(item, kb_folder / item.name)
+        else:
+            kb_folder = base_kb_folder
+        supported_extensions = {'.txt', '.md', '.markdown', '.pdf'}
+        files = []
+        if not kb_folder.exists():
+            return {"files": [], "total": 0, "session_id": session_id}
+        for root, dirs, filenames in os.walk(kb_folder):
+            if not session_id and "sessions" in dirs:
+                dirs.remove("sessions")
+            for filename in filenames:
+                file_path = Path(root) / filename
+                if file_path.suffix.lower() in supported_extensions:
+                    rel_path = os.path.relpath(file_path, kb_folder)
+                    stat = file_path.stat()
+                    files.append({
+                        "filename": filename,
+                        "path": rel_path,
+                        "size": stat.st_size,
+                        "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                        "type": file_path.suffix.lower()
+                    })
+        return {
+            "files": sorted(files, key=lambda x: x["modified"], reverse=True),
+            "total": len(files),
+            "session_id": session_id
+        }
+    except Exception:
+        raise HTTPException(status_code=500, detail="Error listing KB files")
+
+@app.get("/knowledge-base/files/{file_path:path}")
+async def get_kb_file_content(file_path: str, session_id: Optional[str] = None):
+    try:
+        base_kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
+        if session_id:
+            kb_folder = base_kb_folder / "sessions" / session_id
+            kb_folder.mkdir(parents=True, exist_ok=True)
+            if not any(kb_folder.iterdir()):
+                supported_extensions = {'.txt', '.md', '.markdown', '.pdf'}
+                if base_kb_folder.exists():
+                    for item in base_kb_folder.iterdir():
+                        if item.is_file() and item.suffix.lower() in supported_extensions:
+                            shutil.copy2(item, kb_folder / item.name)
+        else:
+            kb_folder = base_kb_folder
+        file_full_path = kb_folder / file_path
+        try:
+            file_full_path.resolve().relative_to(kb_folder.resolve())
+        except ValueError:
+            raise HTTPException(status_code=403, detail="Access denied")
+        if not file_full_path.exists():
+            raise HTTPException(status_code=404, detail="File not found")
+        supported_extensions = {'.txt', '.md', '.markdown', '.pdf'}
+        if file_full_path.suffix.lower() not in supported_extensions:
+            raise HTTPException(status_code=400, detail="Unsupported file type")
+        content = extract_text_from_file(file_full_path)
+        stat = file_full_path.stat()
+        return {
+            "filename": file_full_path.name,
+            "path": file_path,
+            "content": content,
+            "size": stat.st_size,
+            "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+            "type": file_full_path.suffix.lower()
+        }
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=500, detail="Error reading file")
+
+@app.delete("/knowledge-base/files/{file_path:path}")
+async def delete_kb_file(file_path: str, session_id: Optional[str] = None):
+    try:
+        if not session_id:
+            raise HTTPException(status_code=400, detail="session_id is required for delete")
+        base_kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
+        kb_folder = base_kb_folder / "sessions" / session_id
+        kb_folder.mkdir(parents=True, exist_ok=True)
+        if not any(kb_folder.iterdir()):
+            supported_extensions = {'.txt', '.md', '.markdown', '.pdf'}
+            if base_kb_folder.exists():
+                for item in base_kb_folder.iterdir():
+                    if item.is_file() and item.suffix.lower() in supported_extensions:
+                        shutil.copy2(item, kb_folder / item.name)
+        file_full_path = kb_folder / file_path
+        try:
+            file_full_path.resolve().relative_to(kb_folder.resolve())
+        except ValueError:
+            raise HTTPException(status_code=403, detail="Access denied")
+        if not file_full_path.exists():
+            raise HTTPException(status_code=404, detail="File not found")
+        supported_extensions = {'.txt', '.md', '.markdown', '.pdf'}
+        if file_full_path.suffix.lower() not in supported_extensions:
+            raise HTTPException(status_code=400, detail="Unsupported file type")
+        file_full_path.unlink()
+        engine = get_rag_engine(session_id=session_id)
+        from langchain.docstore.document import Document
+        documents = []
+        for root, _, files in os.walk(kb_folder):
+            for fname in files:
+                fpath = Path(root) / fname
+                if fpath.suffix.lower() in supported_extensions and fpath.exists():
+                    try:
+                        content = extract_text_from_file(fpath)
+                        if content and content.strip():
+                            rel_path = os.path.relpath(fpath, kb_folder)
+                            documents.append(Document(
+                                page_content=content.strip(),
+                                metadata={"source": rel_path, "file_type": fpath.suffix.lower()}
+                            ))
+                    except Exception:
+                        continue
+        if documents:
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=engine.chunk_size,
+                chunk_overlap=engine.chunk_overlap,
+                length_function=len
+            )
+            split_docs = text_splitter.split_documents(documents)
+            engine.vectorstore = FAISS.from_documents(split_docs, engine.embedding_model)
+            engine.vectorstore.save_local(engine.index_path)
+        else:
+            engine.vectorstore = None
+        session_rag_engines[session_id] = engine
+        return {
+            "message": f"File {file_path} deleted successfully from your session",
+            "file_path": file_path,
+            "session_id": session_id
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting file: {str(e)}")
+
+@app.post("/knowledge-base/upload")
+async def upload_knowledge_base(
+    files: List[UploadFile] = File(default=[]),
+    session_id: Optional[str] = Form(None),
+    user_id: Optional[str] = Form(None),
+    kb_name: Optional[str] = Form(None)
+):
+    try:
+        if db is None:
+            raise HTTPException(status_code=503, detail="Database not initialized.")
+        if not files or len(files) == 0:
+            raise HTTPException(status_code=400, detail="No files provided")
+        if not session_id:
+            raise HTTPException(status_code=400, detail="session_id is required for upload")
+        supported_extensions = {'.txt', '.md', '.markdown', '.pdf', '.zip'}
+        base_kb_folder = Path(os.getenv("KB_FOLDER", "KB"))
+        session_kb_folder = base_kb_folder / "sessions" / session_id
+        if session_kb_folder.exists():
+            shutil.rmtree(session_kb_folder)
+        session_kb_folder.mkdir(parents=True, exist_ok=True)
+        upload_dir = session_kb_folder
+        user_id = user_id or "anonymous"
+        all_documents = []
+        uploaded_files = []
+        total_size = 0
+        for file in files:
+            if not file.filename:
+                continue
+            file_extension = Path(file.filename).suffix.lower()
+            if file_extension == '.zip':
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    zip_path = Path(temp_dir) / file.filename
+                    with open(zip_path, "wb") as buffer:
+                        shutil.copyfileobj(file.file, buffer)
+                    extract_dir = Path(temp_dir) / "extracted"
+                    extract_dir.mkdir(exist_ok=True)
+                    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                        zip_ref.extractall(extract_dir)
+                    for root, dirs, files_in_zip in os.walk(extract_dir):
+                        for f in files_in_zip:
+                            if Path(f).suffix.lower() in supported_extensions:
+                                src_path = Path(root) / f
+                                rel_path = src_path.relative_to(extract_dir)
+                                dest_path = upload_dir / rel_path
+                                dest_path.parent.mkdir(parents=True, exist_ok=True)
+                                shutil.copy2(src_path, dest_path)
+                                uploaded_files.append(str(rel_path))
+                                total_size += dest_path.stat().st_size
+                    folder_docs = process_folder(upload_dir, str(base_kb_folder))
+                    all_documents.extend(folder_docs)
+            elif file_extension in supported_extensions:
+                saved_filename = file.filename
+                file_path = upload_dir / saved_filename
+                counter = 1
+                while file_path.exists():
+                    name_part = Path(file.filename).stem
+                    ext_part = Path(file.filename).suffix
+                    saved_filename = f"{name_part}_{counter}{ext_part}"
+                    file_path = upload_dir / saved_filename
+                    counter += 1
+                with open(file_path, "wb") as buffer:
+                    shutil.copyfileobj(file.file, buffer)
+                total_size += file_path.stat().st_size
+                try:
+                    doc = process_uploaded_file(file_path, file.filename, str(base_kb_folder))
+                    all_documents.append(doc)
+                    uploaded_files.append(saved_filename)
+                except Exception:
+                    continue
+            else:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Unsupported file format: {file_extension}. Supported formats: .txt, .md, .pdf, .zip"
+                )
+        if not all_documents:
+            raise HTTPException(status_code=400, detail="No valid files were processed")
+        engine = get_rag_engine(session_id=session_id)
+        index_path = Path(engine.index_path)
+        if index_path.exists():
+            if index_path.is_dir():
+                shutil.rmtree(index_path)
+            else:
+                index_path.unlink()
+                pkl_path = Path(str(index_path) + ".pkl")
+                if pkl_path.exists():
+                    pkl_path.unlink()
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=engine.chunk_size,
+            chunk_overlap=engine.chunk_overlap,
+            length_function=len
+        )
+        split_docs = text_splitter.split_documents(all_documents)
+        engine.vectorstore = FAISS.from_documents(split_docs, engine.embedding_model)
+        engine.vectorstore.save_local(engine.index_path)
+        session_rag_engines[session_id] = engine
+        kb_name = kb_name or f"{len(uploaded_files)} file(s)"
+        kb_record = db.save_knowledge_base(
+            user_id, 
+            kb_name, 
+            str(upload_dir),
+            metadata={"files": uploaded_files, "file_count": len(uploaded_files), "session_id": session_id}
+        )
+        db.log_analytics("kb_upload", {
+            "user_id": user_id,
+            "session_id": session_id,
+            "file_count": len(uploaded_files),
+            "file_size": total_size,
+            "files": uploaded_files
+        })
+        return {
+            "message": f"Successfully uploaded {len(uploaded_files)} file(s) to your session.",
+            "session_id": session_id,
+            "files_uploaded": uploaded_files,
+            "file_count": len(uploaded_files),
+            "kb_record": {
+                "kb_name": kb_record["kb_name"],
+                "created_at": kb_record["created_at"].isoformat()
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=500, detail="Error uploading files")
+
+@app.get("/analytics", response_model=AnalyticsResponse)
+async def get_analytics():
+    try:
+        if db is None:
+            raise HTTPException(status_code=503, detail="Database not initialized.")
+        all_sessions = list(db.sessions.find())
+        total_sessions = len(all_sessions)
+        all_messages = list(db.messages.find())
+        total_messages = len(all_messages)
+        today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        sessions_today = len(list(db.sessions.find({"created_at": {"$gte": today_start}})))
+        messages_today = len(list(db.messages.find({"timestamp": {"$gte": today_start}})))
+        user_messages = [msg["content"] for msg in all_messages if msg["role"] == "user"]
+        query_counts = Counter(user_messages)
+        popular_queries = [
+            {"query": query, "count": count}
+            for query, count in query_counts.most_common(10)
+        ]
+        return AnalyticsResponse(
+            total_sessions=total_sessions,
+            total_messages=total_messages,
+            sessions_today=sessions_today,
+            messages_today=messages_today,
+            popular_queries=popular_queries
+        )
+    except Exception:
+        raise HTTPException(status_code=500, detail="Error getting analytics")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
