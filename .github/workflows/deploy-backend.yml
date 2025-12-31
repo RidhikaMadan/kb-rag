@@ -69,7 +69,7 @@ jobs:
             --timeout 600 \
             --cpu-boost \
             --max-instances 10 \
-            --min-instances 0 \
+            --min-instances 1 \
             --clear-secrets \
             --set-env-vars "MONGODB_DB=rag_chatbot,KB_FOLDER=KB,TOKENIZERS_PARALLELISM=false,MONGODB_URI=${{ secrets.MONGODB_URI }},OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" \
             --port 8080 \
