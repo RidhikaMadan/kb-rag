@@ -40,6 +40,9 @@ rag_engines: Dict[str, RAGEngine] = {}
 session_rag_engines: Dict[str, RAGEngine] = {}
 shared_models: Dict[str, Any] = {}
 
+# warm session 
+WARM_SESSION_ID = "__warm__"
+
 @app.on_event("startup")
 async def startup_event():
     global db
@@ -82,6 +85,15 @@ async def startup_event():
         error_msg = str(e)
         print(f"⚠ Warning: Could not initialize RAG engine: {error_msg}")
         shared_models.clear()
+    # Warm a template session engine
+    print("\n[3/3] Warming default session engine...")
+    try:
+        get_rag_engine(session_id=WARM_SESSION_ID)
+        print("✓ Default session engine warmed.")
+    except Exception as e:
+        print(f"⚠ Warm session failed: {e}")
+
+
     print("\n[3/3] Startup complete!")
     print("="*60)
     print("Backend is ready to accept requests.")
@@ -94,23 +106,55 @@ def get_rag_engine(session_id: Optional[str] = None) -> RAGEngine:
     use_local_env = os.getenv("USE_LOCAL_LLM", "false").lower() == "true"
     openai_api_key = os.getenv("OPENAI_API_KEY")
     base_kb_folder = os.getenv("KB_FOLDER", "KB")
+
     model_path = "models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
     local_model_exists = os.path.exists(model_path)
+
     if use_local_env:
         use_local = True
     elif not openai_api_key and local_model_exists:
         use_local = True
         print("WARNING: OPENAI_API_KEY not set, but local model found. Using local model.")
     elif not openai_api_key:
-        raise ValueError(
-            "OPENAI_API_KEY is not set and no local model found."
-        )
+        raise ValueError("OPENAI_API_KEY is not set and no local model found.")
     else:
         use_local = False
+
+    # ---------- SESSION ENGINE ----------
     if session_id:
+        # reuse warmed engine
+        if session_id in session_rag_engines:
+            return session_rag_engines[session_id]
+
+        # clone warm session if exists
+        if "__warm__" in session_rag_engines and session_id != "__warm__":
+            warm_engine = session_rag_engines["__warm__"]
+
+            session_kb_folder = Path(base_kb_folder) / "sessions" / session_id
+            session_index_path = f"index.faiss/sessions/{session_id}"
+            session_kb_folder.mkdir(parents=True, exist_ok=True)
+            Path(session_index_path).parent.mkdir(parents=True, exist_ok=True)
+
+            engine = RAGEngine(
+                kb_folder=str(session_kb_folder),
+                index_path=session_index_path,
+                use_local_llm=warm_engine.use_local_llm,
+                openai_api_key=openai_api_key if not warm_engine.use_local_llm else None,
+                shared_llm_provider=warm_engine.llm_provider,
+                shared_embedding_model=warm_engine.embedding_model,
+                shared_reranker=warm_engine.reranker,
+                shared_intent_classifier=warm_engine.intent_classifier
+            )
+
+            session_rag_engines[session_id] = engine
+            return engine
+
+        # cold session fallback
         session_kb_folder = Path(base_kb_folder) / "sessions" / session_id
         session_index_path = f"index.faiss/sessions/{session_id}"
         session_kb_folder.mkdir(parents=True, exist_ok=True)
+        Path(session_index_path).parent.mkdir(parents=True, exist_ok=True)
+
         if not any(session_kb_folder.iterdir()):
             base_kb_path = Path(base_kb_folder)
             if base_kb_path.exists():
@@ -118,57 +162,50 @@ def get_rag_engine(session_id: Optional[str] = None) -> RAGEngine:
                 for item in base_kb_path.iterdir():
                     if item.is_file() and item.suffix.lower() in supported_extensions:
                         shutil.copy2(item, session_kb_folder / item.name)
-        index_dir = Path(session_index_path).parent
-        index_dir.mkdir(parents=True, exist_ok=True)
-        if session_id in session_rag_engines:
-            return session_rag_engines[session_id]
+
+                base_index_path = Path("index.faiss")
+                session_index_dir = Path(session_index_path)
+                if base_index_path.exists() and base_index_path.is_dir():
+                    try:
+                        session_index_dir.mkdir(parents=True, exist_ok=True)
+                        for item in base_index_path.iterdir():
+                            if item.is_file():
+                                shutil.copy2(item, session_index_dir / item.name)
+                        print("Copied base index to session index (fast path)")
+                    except Exception:
+                        pass
+
         if use_local and not local_model_exists:
-            raise ValueError(
-                f"Local model file not found at {model_path}."
-            )
-        if shared_models:
-            session_engine = RAGEngine(
-                kb_folder=str(session_kb_folder),
-                index_path=session_index_path,
-                use_local_llm=use_local,
-                openai_api_key=openai_api_key if not use_local else None,
-                shared_llm_provider=shared_models.get('llm_provider'),
-                shared_embedding_model=shared_models.get('embedding_model'),
-                shared_reranker=shared_models.get('reranker'),
-                shared_intent_classifier=shared_models.get('intent_classifier')
-            )
-        else:
-            session_engine = RAGEngine(
-                kb_folder=str(session_kb_folder),
-                index_path=session_index_path,
-                use_local_llm=use_local,
-                openai_api_key=openai_api_key if not use_local else None
-            )
-        session_rag_engines[session_id] = session_engine
-        return session_engine
+            raise ValueError(f"Local model file not found at {model_path}.")
+
+        engine = RAGEngine(
+            kb_folder=str(session_kb_folder),
+            index_path=session_index_path,
+            use_local_llm=use_local,
+            openai_api_key=openai_api_key if not use_local else None,
+            shared_llm_provider=shared_models.get("llm_provider"),
+            shared_embedding_model=shared_models.get("embedding_model"),
+            shared_reranker=shared_models.get("reranker"),
+            shared_intent_classifier=shared_models.get("intent_classifier")
+        )
+
+        session_rag_engines[session_id] = engine
+        return engine
+
+    # ---------- BASE ENGINE ----------
     engine_key = "local" if use_local else "openai"
     if engine_key not in rag_engines:
         if use_local and not local_model_exists:
-            raise ValueError(
-                f"Local model file not found at {model_path}."
-            )
-        if shared_models:
-            rag_engines[engine_key] = RAGEngine(
-                kb_folder=base_kb_folder,
-                use_local_llm=use_local,
-                openai_api_key=openai_api_key if not use_local else None,
-                shared_llm_provider=shared_models.get('llm_provider'),
-                shared_embedding_model=shared_models.get('embedding_model'),
-                shared_reranker=shared_models.get('reranker'),
-                shared_intent_classifier=shared_models.get('intent_classifier')
-            )
-        else:
-            rag_engines[engine_key] = RAGEngine(
-                kb_folder=base_kb_folder,
-                use_local_llm=use_local,
-                openai_api_key=openai_api_key if not use_local else None
-            )
+            raise ValueError(f"Local model file not found at {model_path}.")
+
+        rag_engines[engine_key] = RAGEngine(
+            kb_folder=base_kb_folder,
+            use_local_llm=use_local,
+            openai_api_key=openai_api_key if not use_local else None
+        )
+
     return rag_engines[engine_key]
+
 
 class ChatMessage(BaseModel):
     message: str
