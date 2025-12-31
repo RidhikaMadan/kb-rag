@@ -78,7 +78,7 @@ class RAGEngine:
         self,
         kb_folder="KB",
         index_path="index.faiss",
-        top_k=5,
+        top_k=3,
         chunk_size=500,
         chunk_overlap=50,
         embedding_model_name="sentence-transformers/all-mpnet-base-v2",
@@ -225,7 +225,8 @@ class RAGEngine:
         # Ensure query is UTF-8 safe
         query = ensure_utf8(query)
         
-        k = self.top_k * 3 if session_id else self.top_k
+        # k = self.top_k * 3 if session_id else self.top_k
+        k = self.top_k
         results_with_scores = self.vectorstore.similarity_search_with_score(query, k=k)
         filtered_docs = [(doc, score) for doc, score in results_with_scores if score >= min_score]
         
