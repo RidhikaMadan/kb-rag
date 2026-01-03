@@ -15,7 +15,7 @@ function App() {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! How can I help you today? You can ask me any questions you have about the knowledge base.",
+      text: "Hello! How can I assist you today? You can ask me any questions about the sample knowledge base, or upload your files by clicking the 'View or Upload Files' button.",
       sender: 'bot',
       timestamp: new Date()
     }
